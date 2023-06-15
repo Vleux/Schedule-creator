@@ -1,5 +1,28 @@
 package main
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+
 fun main() {
-    println("FDA FSDADFAS FSD".lowercase().replaceFirstChar { it.uppercase() })
+    val kid = Child()
+    kid.use()
+
+}
+
+open class Parent{
+    protected open fun new(){
+        println(1)
+    }
+
+    fun use(){
+        println("Hello")
+        new()
+    }
+}
+
+class Child: Parent() {
+    override fun new(){
+        super.new()
+        println("Added")
+    }
 }
