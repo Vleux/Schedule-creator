@@ -1,6 +1,6 @@
 package objects
 
-import classes.Person
+import classes.data.Person
 
 object People {
     private var people: MutableList<Person> = mutableListOf()
@@ -25,10 +25,11 @@ object People {
      * @return true -> Person deleted
      * @return false -> Person was not found.
      */
-    fun deletePerson(personId: String): Boolean{
+    fun removePerson(personId: String): Boolean{
         for (person in this.people){
             if (person.id == personId){
                 this.people.remove(person)
+                IdKeeper.deleteId(person.id)
                 return true
             }
         }
@@ -48,12 +49,22 @@ object People {
         return null
     }
 
-    /**
-     * Deletes the Person with the same Id and saves this one.
-     * Same as changing a Person
-     */
-    fun replacePerson(person: Person){
-        this.deletePerson(person.id)
-        this.addPerson(person)
+    fun changePerson(changedPerson: Person): Boolean{
+        return if (doesPersonExist(changedPerson.id)){
+            this.removePerson(changedPerson.id)
+            this.addPerson(changedPerson)
+            true
+        }else{
+            false
+        }
+    }
+
+    fun doesPersonExist(personId: String): Boolean{
+        for (person in this.people){
+            if (person.id == personId){
+                return true
+            }
+        }
+        return false
     }
 }

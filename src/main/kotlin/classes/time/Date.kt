@@ -1,5 +1,6 @@
-package classes
+package classes.time
 
+import classes.time.Date
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -7,6 +8,20 @@ import java.time.temporal.ChronoUnit
 class Date (
     date: String
 ) : Comparable<Date> {
+
+    companion object {
+
+        private val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+
+        /**
+         * Casts a LocalDate to a Date
+         */
+        fun toDate(date: LocalDate): Date {
+            return Date (
+                formatter.format(date)
+            )
+        }
+    }
 
     private var date: LocalDate = LocalDate.parse(date, formatter)
 
@@ -48,17 +63,18 @@ class Date (
         }
     }
 
-    companion object {
+    // Override methods
 
-        private val formatter = DateTimeFormatter.ofPattern("dd-mm-yyyy")
+    override fun toString(): String{
+        return this.date.toString()
+    }
 
-        /**
-         * Casts a LocalDate to a Date
-         */
-        fun toDate(date: LocalDate): Date{
-            return Date (
-                this.formatter.format(date)
-            )
-        }
+    // Hashing the date-String (for the Map in a Task)
+    override fun hashCode(): Int {
+        return this.toString().hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return (other is Date && other.date == this.date)
     }
 }

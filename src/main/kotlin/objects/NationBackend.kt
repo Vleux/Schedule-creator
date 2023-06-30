@@ -1,7 +1,7 @@
 package objects
 
 object NationBackend {
-    private var Nations: MutableList<String> = mutableListOf("macedonia", "germany")
+    private var Nations: ArrayList<String> = arrayListOf("macedonia", "germany")
 
     fun addNation(newNation: String){
         Nations.add(newNation)

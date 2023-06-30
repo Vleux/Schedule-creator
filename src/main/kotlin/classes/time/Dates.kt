@@ -1,4 +1,6 @@
-package classes
+package classes.time
+
+import classes.time.Date
 
 open class Dates(
     protected var firstDay: Date,
@@ -9,11 +11,11 @@ open class Dates(
         this.check()
     }
 
-    fun receiveFirstDay(): Date{
+    fun getFirstDay(): Date {
         return this.firstDay
     }
 
-    fun receiveLastDay(): Date{
+    fun getLastDay(): Date {
         return this.lastDay
     }
 
@@ -39,6 +41,19 @@ open class Dates(
     fun endOn(day: Date){
         this.lastDay = day
         this.check()
+    }
+
+    /**
+     * Returns all the Dates in the Date-Period
+     */
+    fun getDateArray(): Array<Date>{
+        val cache = mutableListOf<Date>()
+        val currentDay = this.firstDay
+        while (currentDay <= this.lastDay){
+            cache.add(currentDay)
+            currentDay.changeDate(1)
+        }
+        return cache.toTypedArray()
     }
 
     // Ensuring, that the last and first Day are in the correct order

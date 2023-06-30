@@ -1,4 +1,4 @@
-package classes
+package classes.time
 
 class WorkDays(
     arrival: Date,
@@ -6,7 +6,8 @@ class WorkDays(
 ): Dates(arrival, leave) {
 
     init {
-
+        this.changeFirstDay(1)
+        this.changeLastDay(-1)
     }
 
     // Manages Free Days (Adding, deleting, getting)

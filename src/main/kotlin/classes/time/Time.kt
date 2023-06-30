@@ -1,4 +1,4 @@
-package classes
+package classes.time
 
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -10,7 +10,7 @@ class Time (
     time: String
 ) {
 
-    private val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("hh:mm")
+    private val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("kk:mm")
     private val time: LocalTime = LocalTime.parse(time, formatter)
 
     fun getTime(): LocalTime{
@@ -20,5 +20,9 @@ class Time (
     fun changeTime(hours: Long, minutes: Long){
         this.time.plusHours(hours)
         this.time.plusMinutes(minutes)
+    }
+
+    override fun toString(): String {
+        return time.toString()
     }
 }
