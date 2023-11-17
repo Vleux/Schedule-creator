@@ -99,6 +99,18 @@ class Person: Comparable<Person>{
             this._freeFromDuty = free
         }
 
+    fun addTask(taskId: String, date: Date){
+        if (myTasks[taskId] == null){
+            this.myTasks[taskId] = date
+        }
+    }
+
+    fun removeTask(taskId: String){
+        if (myTasks[taskId] != null){
+            myTasks.remove(taskId)
+        }
+    }
+
     // Overriding some functions
 
     /**
