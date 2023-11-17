@@ -11,16 +11,17 @@ class Person: Comparable<Person>{
     // Attributes
 
     private var _id: String
-    private var _surname: String
+    private var _firstname: String
     private var _lastname: String
     private var _dateOfBirth: Date
-    private var _nationality: String
+    private var _nationality: String = ""
         set(value){
             field = NationBackend.parseNation(value)
         }
     private var _drivingLicense: Boolean
     private var _visit: WorkDays
     private var _freeFromDuty: Boolean
+    private var myTasks: MutableMap<String, Date> = mutableMapOf()
 
     // Constructors
 
@@ -35,28 +36,7 @@ class Person: Comparable<Person>{
     ){
         this._id = IdKeeper.getNextPersonId()
 
-        this._surname = surname
-        this._lastname = lastname
-        this._dateOfBirth = dateOfBirth
-        this._nationality = nation
-        this._drivingLicense = drivingLicense
-        this._visit = visit
-        this._freeFromDuty = freeFromDuty
-    }
-
-    private constructor(
-        id: String,
-        surname: String,
-        lastname: String,
-        dateOfBirth: Date,
-        nation: String,
-        drivingLicense: Boolean,
-        visit: WorkDays,
-        freeFromDuty: Boolean
-    ){
-        this._id = id
-
-        this._surname = surname
+        this._firstname = surname
         this._lastname = lastname
         this._dateOfBirth = dateOfBirth
         this._nationality = nation
@@ -69,25 +49,55 @@ class Person: Comparable<Person>{
 
     val id: String
         get() = this._id
-    val surname: String
-        get() = this._surname
-    val lastname: String
+    var firstname: String
+        get() = this._firstname
+        set(name: String){
+            if (name.length > 0){
+                this._firstname = name
+            }
+        }
+    var lastname: String
         get() = this._lastname
-    val dateOfBirth: Date
+        set(newLastname: String){
+            if (lastname.length > 0){
+                this._lastname = newLastname
+            }
+        }
+    var dateOfBirth: Date
         get() = this._dateOfBirth
+        set(newDate: Date){
+            val today = Date.toDate(LocalDate.now())
+            if (newDate > today){
+                this._dateOfBirth = newDate
+            }
+            this._dateOfBirth = dateOfBirth
+        }
     val age: Int // in Years
         get() {
             val today = Date.toDate(LocalDate.now())
             return (this.dateOfBirth.daysUntil(today) / 365).toInt()
         }
-    val nationality: String
+    var nationality: String
         get() = this._nationality
-    val drivingLicense: Boolean
+        set(nationality){
+            val nation = NationBackend.parseNation(nationality)
+            if (nation != "invalid"){
+                this._nationality = nationality
+            }
+        }
+    var drivingLicense: Boolean
         get() = this._drivingLicense
-    val visit: WorkDays
+        set(license){this._drivingLicense = license}
+    var visit: WorkDays
         get() = this._visit
-    val freeFromDuty: Boolean
+        set(newVisit){
+            this._visit = newVisit
+        }
+    var freeFromDuty: Boolean
         get() = this._freeFromDuty
+        set(free){
+            this._freeFromDuty = free
+        }
 
     // Overriding some functions
 
@@ -116,98 +126,5 @@ class Person: Comparable<Person>{
         }else{
             false
         }
-    }
-
-    // Functions to change values and return a new Person
-
-    fun newSurname(newSurname: String): Person {
-        return Person(
-            this._id,
-            newSurname,
-            this.lastname,
-            this.dateOfBirth,
-            this.nationality,
-            this.drivingLicense,
-            this.visit,
-            this.freeFromDuty
-        )
-    }
-
-    fun newLastname(newLastname: String): Person {
-        return Person(
-            this._id,
-            this.surname,
-            newLastname,
-            this.dateOfBirth,
-            this.nationality,
-            this.drivingLicense,
-            this.visit,
-            this.freeFromDuty
-        )
-    }
-
-    fun newDateOfBirth(newDateOfBirth: Date): Person {
-        return Person(
-            this._id,
-            this.surname,
-            this.lastname,
-            newDateOfBirth,
-            this.nationality,
-            this.drivingLicense,
-            this.visit,
-            this.freeFromDuty
-        )
-    }
-
-    fun newNationality(newNationality: String): Person {
-        return Person(
-            this._id,
-            this.surname,
-            this.lastname,
-            this.dateOfBirth,
-            newNationality,
-            this.drivingLicense,
-            this.visit,
-            this.freeFromDuty
-        )
-    }
-
-    fun newDrivingLicense(newDrivingLicense: Boolean): Person {
-        return Person(
-            this._id,
-            this.surname,
-            this.lastname,
-            this.dateOfBirth,
-            this.nationality,
-            newDrivingLicense,
-            this.visit,
-            this.freeFromDuty
-        )
-    }
-
-    fun newVisit(newVisit: WorkDays): Person {
-        return Person(
-            this._id,
-            this.surname,
-            this.lastname,
-            this.dateOfBirth,
-            this.nationality,
-            this.drivingLicense,
-            newVisit,
-            this.freeFromDuty
-        )
-    }
-
-    fun newFreeFromDuty(newFreeFromDuty: Boolean): Person {
-        return Person(
-            this._id,
-            this.surname,
-            this.lastname,
-            this.dateOfBirth,
-            this.nationality,
-            this.drivingLicense,
-            this.visit,
-            newFreeFromDuty
-        )
     }
 }

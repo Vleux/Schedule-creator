@@ -1,10 +1,8 @@
 package classes.time
 
-import classes.time.Date
-
 open class Dates(
-    protected var firstDay: Date,
-    protected var lastDay: Date
+    @JvmField protected var firstDay: Date,
+    @JvmField protected var lastDay: Date
 ){
 
     init {

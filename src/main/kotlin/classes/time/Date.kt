@@ -1,6 +1,5 @@
 package classes.time
 
-import classes.time.Date
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -47,7 +46,7 @@ class Date (
     }
 
     /**
-     * Returns the number of Days that have passed between this.date and the given Date
+     * Returns the number of Da3ys that have passed between this.date and the given Date
      */
     fun daysUntil(otherDate: Date): Long{
         return ChronoUnit.DAYS.between(otherDate.date, this.date)

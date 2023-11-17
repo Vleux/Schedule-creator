@@ -48,6 +48,10 @@ object Tasks {
         return null
     }
 
+    fun getAllTasks(): ArrayList<Task>{
+        return this.allTasks
+    }
+
     fun changeTask(changedTask: Task): Boolean{
         return if (doesTaskExist(changedTask.id)){
             this.removeTask(changedTask.id)

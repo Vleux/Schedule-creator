@@ -1,70 +1,71 @@
 package objects
 
 import classes.data.Person
+import classes.time.Date
+import classes.time.WorkDays
 
 object People {
-    private var people: MutableList<Person> = mutableListOf()
+    private var people: MutableMap<String, Person> = mutableMapOf()
 
     /**
-     * Adds a new Person to the people-list, if it is not already added.
-     * The list will be resorted.
-     * Returns true on success, false if the person does already exist
+     * Adds a new Person to the people-map, if it does not exist already.
+     * Returns true on success, false if the person does already exist.
      */
     fun addPerson(person: Person): Boolean{
-        return if (!this.people.contains(person)){
-            this.people.add(person)
-            this.people.sort()
-            true
-        }else{
-            false
-        }
-    }
-
-    /**
-     * Deletes a Person from the list, using their id.
-     * @return true -> Person deleted
-     * @return false -> Person was not found.
-     */
-    fun removePerson(personId: String): Boolean{
-        for (person in this.people){
-            if (person.id == personId){
-                this.people.remove(person)
-                IdKeeper.deleteId(person.id)
-                return true
-            }
+        if (this.people[person.id] == null){
+            this.people[person.id] = person
+            return true
         }
         return false
     }
 
     /**
-     * Returns the Person with the given ID.
-     * If there is no Person with such an ID, null will be returned
+     * Removes a person from the people-map if it does exist.
      */
-    fun getPerson(personId: String): Person?{
-        for (person in this.people){
-            if (person.id == personId){
-                return person
-            }
-        }
-        return null
-    }
-
-    fun changePerson(changedPerson: Person): Boolean{
-        return if (doesPersonExist(changedPerson.id)){
-            this.removePerson(changedPerson.id)
-            this.addPerson(changedPerson)
-            true
-        }else{
-            false
-        }
+    fun removePerson(personId: String){
+        this.people.remove(personId)
     }
 
     fun doesPersonExist(personId: String): Boolean{
-        for (person in this.people){
-            if (person.id == personId){
-                return true
-            }
-        }
-        return false
+        return this.people[personId] != null
     }
+
+    /**Change a Persons properties **/
+
+    fun changePersonFirstname(id: String, newFirstname: String){
+        this.people[id]?.firstname = newFirstname
+    }
+
+    fun changePersonLastname(id: String, newLastname: String){
+        this.people[id]?.lastname = newLastname
+    }
+
+    fun changeDateOfBirth(id: String, newDateOfBirth: Date){
+        this.people[id]?.dateOfBirth = newDateOfBirth
+    }
+
+    fun changeNationality(id: String, newNation: String){
+        this.people[id]?.nationality = newNation
+    }
+
+    fun changeDrivingLicense(id: String, drivingLicense: Boolean){
+        this.people[id]?.drivingLicense = drivingLicense
+    }
+
+    fun changeVisit(id:String, newVisit: WorkDays){
+        this.people[id]?.visit = newVisit
+    }
+
+    fun changeFreeFromDuty(id: String, newFreeFromDuty: Boolean){
+        this.people[id]?.freeFromDuty = newFreeFromDuty
+    }
+
+    fun addTask(personId: String, taskId: String, date: Date){
+        this.people[personId]?.addTask(taskId, date)
+    }
+
+    fun removeTask(personId: String, taskId: String){
+        this.people[personId]?.removeTask(taskId)
+    }
+
 }

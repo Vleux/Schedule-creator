@@ -3,6 +3,7 @@ package main
 import classes.data.ScheduledTask
 import classes.data.Task
 import classes.time.Date
+import classes.time.Dates
 import classes.time.Time
 
 fun main() {
@@ -30,6 +31,13 @@ fun main() {
     a.remove(s2)
 
     println(a.toList())
+
+    var date = Dates(
+        Date("01-03-2023"),
+        Date("04-05-2023")
+    )
+
+    println(date.getFirstDay())
 
 }
 
