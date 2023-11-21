@@ -19,6 +19,14 @@ object People {
         return false
     }
 
+    fun getAllPeopleIDs(): Array<String>{
+        return this.people.keys.toTypedArray()
+    }
+
+    fun getPersonById(id: String): Person?{
+        return this.people[id]
+    }
+
     /**
      * Removes a person from the people-map if it does exist.
      */

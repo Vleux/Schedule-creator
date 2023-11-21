@@ -1,6 +1,7 @@
 package classes.data
 
 import classes.time.Date
+import classes.time.Dates
 import classes.time.WorkDays
 import objects.IdKeeper
 import objects.NationBackend
@@ -10,7 +11,7 @@ class Person: Comparable<Person>{
 
     // Attributes
 
-    private var _id: String
+    private var _id: String = IdKeeper.getNextPersonId()
     private var _firstname: String
     private var _lastname: String
     private var _dateOfBirth: Date
@@ -22,7 +23,6 @@ class Person: Comparable<Person>{
     private var _visit: WorkDays
     private var _freeFromDuty: Boolean
     private var myTasks: MutableMap<String, Date> = mutableMapOf()
-
     // Constructors
 
     public constructor(
@@ -34,7 +34,6 @@ class Person: Comparable<Person>{
         visit: WorkDays,
         freeFromDuty: Boolean = false
     ){
-        this._id = IdKeeper.getNextPersonId()
 
         this._firstname = surname
         this._lastname = lastname
@@ -111,6 +110,12 @@ class Person: Comparable<Person>{
         }
     }
 
+    fun getTasksWithDate(): MutableMap<String, Date>{return this.myTasks}
+
+    fun getJustTaskIDs(): Array<String>{
+        return this.myTasks.keys.toTypedArray()
+    }
+
     // Overriding some functions
 
     /**
@@ -138,5 +143,9 @@ class Person: Comparable<Person>{
         }else{
             false
         }
+    }
+
+    override fun hashCode(): Int {
+        return _id.hashCode()
     }
 }

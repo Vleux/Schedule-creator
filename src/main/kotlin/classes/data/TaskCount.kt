@@ -1,0 +1,29 @@
+package classes.data
+
+class TaskCount {
+    private var _generalTasks: Int = 0
+    var generalTasks
+        get() = _generalTasks
+        set(new: Int){
+            val cache = new - _generalTasks
+            if (_generalTasks + cache > 0 && ((_generalTasks + cache) >= (maximalFairnessTasks + mediumFairnessTasks))){
+                _generalTasks = new
+            }
+        }
+    var maximalFairnessTasks: Int = 0
+        set(new: Int) {
+            val cache = new - maximalFairnessTasks
+            if (maximalFairnessTasks + new > 0){
+                _generalTasks += cache
+                field = new
+            }
+        }
+    var mediumFairnessTasks: Int = 0
+        set (new: Int){
+            val cache = new - mediumFairnessTasks
+            if (mediumFairnessTasks + new > 0){
+                this._generalTasks += cache
+                field = new
+            }
+        }
+}

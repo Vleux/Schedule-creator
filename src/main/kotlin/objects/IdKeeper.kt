@@ -12,8 +12,8 @@ object IdKeeper {
     private var deletedTaskId: ArrayList<String> = arrayListOf()
     private var deletedScheduledTaskId: ArrayList<String> = arrayListOf()
 
-    fun getNextPersonId(): String{
-        val cache =  "Person-${this.nextPersonID}"
+    fun getNextPersonId(): String {
+        val cache = "Person-${this.nextPersonID}"
         this.nextPersonID++
         return cache
     }
