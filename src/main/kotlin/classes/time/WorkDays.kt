@@ -2,17 +2,21 @@ package classes.time
 
 class WorkDays(
     arrival: Date,
-    leave: Date
+    timeOfArrival: Time,
+    leave: Date,
+    timeOfLeave: Time
 ): Dates(arrival, leave) {
 
+    private var freeDays: MutableList<Date> = mutableListOf()
+    var timeOfArrival: Time
+    var timeOfLeave: Time
+
     init {
-        this.changeFirstDay(1)
-        this.changeLastDay(-1)
+        this.timeOfArrival = timeOfArrival
+        this.timeOfLeave = timeOfLeave
     }
 
     // Manages Free Days (Adding, deleting, getting)
-
-    private var freeDays: MutableList<Date> = mutableListOf()
 
     fun addFreeDay(day: Date){
         if (day <= super.lastDay && day >= super.firstDay){
@@ -29,7 +33,7 @@ class WorkDays(
     }
 
     /**
-     * Returns a List of the days the person is acutally working
+     * Returns a List of the days the person is actually working
      */
     fun getWorkDays(): Array<Date>{
         val workDays: MutableList<Date> = mutableListOf()

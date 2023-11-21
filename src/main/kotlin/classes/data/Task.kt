@@ -3,73 +3,83 @@ package classes.data
 import classes.time.Time
 import classes.time.Date
 import objects.IdKeeper
+import objects.Tasks
 
-class Task: Comparable<Task>{
+class Task(
+    name: String,
+    numberOfPeople: Int,
+    dateTime: Map<Date, Array<Time>>,
+    incompatibleTasks: Array<String> = emptyArray(),
+    excludedBy: Array<String> = emptyArray(),
+    driver: Boolean = false
+) : Comparable<Task>{
 
     // Attributes
 
     private var _id: String
 
-    private var _name: String
-    private var _numberOfPeople: Int
-    private var _dateTime: Map<Date, Array<Time>>
-    private var _incompatibleTasks: Array<String>
-    private var _driver: Boolean
+    private var _name: String = name
+    private var _numberOfPeople: Int = numberOfPeople
+    private var _dateTime: Map<Date, Array<Time>> = dateTime
+    private var _excludesTasks: Array<String> = incompatibleTasks
+    private var _excludedBy: Array<String> = excludedBy
+    private var _driver: Boolean = driver
     // Constructors
-
-    public constructor(
-        name: String,
-        numberOfPeople: Int,
-        dateTime: Map<Date, Array<Time>>,
-        incompatibleTasks: Array<String> = emptyArray(),
-        driver: Boolean = false
-    ){
-        this._name = name
-        this._numberOfPeople = numberOfPeople
-        this._dateTime = dateTime
-        this._incompatibleTasks = incompatibleTasks
-        this._driver = driver
-
-        this._id = IdKeeper.getNextTaskId()
-
-    }
-
-    /**
-     * This constructor is needed to create a Task that does have the same ID
-     * as the previous one. Needed to change a Task in the "Tasks" object.
-     */
-    private constructor(
-        id: String,
-        name: String,
-        numberOfPeople: Int,
-        dateTime: Map<Date, Array<Time>>,
-        incompatibleTasks: Array<String>,
-        driver: Boolean
-    ){
-        this._name = name
-        this._numberOfPeople = numberOfPeople
-        this._dateTime = dateTime
-        this._incompatibleTasks = incompatibleTasks
-        this._driver = driver
-
-
-        this._id = id
-    }
 
     // Masks and getters
 
-    val name: String
+    var name: String
         get() = this._name
-    val numberOfPeople: Int
+        set(name) {
+            if (name.length > 2){
+                this.name = name
+            }
+        }
+    var numberOfPeople: Int
         get() = this._numberOfPeople
-    val dateTime: Map<Date, Array<Time>>
+        set(numb){
+            if (numb >= 1){
+                this._numberOfPeople = numb
+            }
+        }
+    var dateTime: Map<Date, Array<Time>>
         get() = this._dateTime
-    val incompatibleTasks: Array<String>
-        get() = this._incompatibleTasks
-    val driver: Boolean
+        set(new){
+            if (new.keys.size > 0){
+                this._dateTime = new
+            }
+        }
+    val excludesTasks: Array<String>
+        get() = this._excludesTasks
+    val excludedBy: Array<String>
+        get() = this._excludedBy
+    var driver: Boolean
         get() = this._driver
+        set(new){
+            this._driver = driver
+        }
     val id: String
         get() = this._id
+
+    /**
+     * Adds an task that is excluded by this Task.
+     */
+    fun addExcludedTask(id: String): Boolean{
+        if (Tasks.doesTaskExist(id) && !this.excludesTasks.contains(id) && !this.excludedBy.contains(id)){
+            this._excludesTasks += id
+            Tasks.getTask(id)!!.addExcludedBy(this.id)
+            return true
+        }
+        return false
+    }
+
+    private fun addExcludedBy(id: String): Boolean{
+        if (!this.excludesTasks.contains(id) && !this.excludedBy.contains(id)){
+            this._excludedBy += id
+            return true
+        }
+        return false
+    }
 
     // overriding some functions
 
@@ -96,7 +106,10 @@ class Task: Comparable<Task>{
         }
     }
 
-    fun getTimeOn(date: Date): Array<Time>{
+    /**
+     * Returns all the Time when it should happen on a specified day
+     */
+    fun getTimeOnDate(date: Date): Array<Time>{
         return if (this.dateTime[date] != null) {
             this.dateTime[date]!!
         }
@@ -105,59 +118,11 @@ class Task: Comparable<Task>{
         }
     }
 
-    // Setter, that return instead of change
-
-    fun newName(newName: String): Task{
-        return Task(
-            this._id,
-            newName,
-            this.numberOfPeople,
-            this.dateTime,
-            this.incompatibleTasks,
-            this.driver)
+    override fun hashCode(): Int {
+        return _id.hashCode()
     }
 
-    fun newNumberOfPeople(newNumber: Int): Task{
-        return Task(
-            this._id,
-            this.name,
-            newNumber,
-            this.dateTime,
-            this.incompatibleTasks,
-            this.driver
-        )
-    }
-
-    fun newDateTime(newDateTime: Map<Date, Array<Time>>): Task{
-        return Task(
-            this._id,
-            this.name,
-            this.numberOfPeople,
-            newDateTime,
-            this.incompatibleTasks,
-            this.driver
-        )
-    }
-
-    fun newIncompatibleTasks(newIncompatibleTasks: Array<String>): Task {
-        return Task(
-            this._id,
-            this.name,
-            this.numberOfPeople,
-            this.dateTime,
-            newIncompatibleTasks,
-            this.driver
-        )
-    }
-
-    fun newDriver(newDriver: Boolean): Task{
-        return Task(
-            this._id,
-            this.name,
-            this.numberOfPeople,
-            this.dateTime,
-            this.incompatibleTasks,
-            newDriver
-        )
+    init {
+        this._id = IdKeeper.getNextTaskId()
     }
 }
