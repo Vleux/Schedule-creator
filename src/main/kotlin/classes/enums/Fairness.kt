@@ -1,4 +1,4 @@
-package classes.data
+package classes.enums
 
 enum class Fairness{
     MAXIMUM,

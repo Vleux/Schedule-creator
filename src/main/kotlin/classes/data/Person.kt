@@ -25,7 +25,7 @@ class Person: Comparable<Person>{
     private var _visit: WorkDays
     private var _freeFromDuty: Boolean
     private var myTasks: MutableMap<String, Date> = mutableMapOf()
-    var timePercentage: Double = -1.0
+    var timePercentage: Double = -1.0       // Saves the relative amount of time the person is present
 
     public constructor(
         surname: String,

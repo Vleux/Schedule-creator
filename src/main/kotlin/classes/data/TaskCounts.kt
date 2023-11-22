@@ -1,16 +1,9 @@
 package classes.data
 
-import classes.time.Date
 import objects.People
 
-class PersonLists {
+class TaskCounts {
 
-    private enum class Availability{
-        ALL_DAY, ARRIVAL, LEAVE
-    }
-
-    // saves the people that are available on that day. The ones that are arriving/leaving and the ones that are there the whole day
-    private lateinit var peopleAvailable: MutableMap< Date, MutableMap< Availability, NationList > >
     // Saves the amount of general tasks in relation to the persons
     private lateinit var genTasksPerPerson: HashMap<Int, ArrayList<String>>
     // Saves the amount of high fairness tasks in relation to the persons
@@ -23,7 +16,6 @@ class PersonLists {
 
     init {
         this.generateAmountOfTasks()
-        this.generateAvailablePersons()
     }
 
     /**
@@ -42,48 +34,6 @@ class PersonLists {
         }
     }
 
-    /**
-     * USE ONLY IN INIT!
-     * reads through all persons and saves their availabilities
-     */
-    private fun generateAvailablePersons(){
-        this.peopleAvailable = hashMapOf()
-        val ids = People.getAllPeopleIDs()
-
-        for (id in ids){
-
-            val cache = People.getPersonById(id)!!.visit
-            val firstDay = cache.getFirstDay()
-            val lastDay = cache.getLastDay()
-            val dates = cache.getWorkDays().toMutableList(); dates.remove(firstDay); dates.remove(lastDay)
-
-            for (date in dates){
-                this.addPersonToDay(id, date, Availability.ALL_DAY)
-            }
-
-            this.addPersonToDay(id, firstDay, Availability.ARRIVAL)
-            this.addPersonToDay(id, lastDay, Availability.LEAVE)
-
-        }
-    }
-
-    /**
-     * USE ONLY IN INIT!
-     * Adds a Person to one day (beeing available) with the correct ENUM-Identifier
-     */
-    private fun addPersonToDay(id: String, date: Date, availability: Availability){
-        if (this.peopleAvailable[date]?.get(availability) != null){
-            this.peopleAvailable[date]!![availability]!!.addPerson(People.getPersonById(id)!!.nationality, id)
-
-        }else if (this.peopleAvailable[date] != null){
-            this.peopleAvailable[date]!![availability] = NationList()
-            addPersonToDay(id, date, availability)
-
-        }else{
-            this.peopleAvailable[date] = mutableMapOf(Pair(availability, NationList()))
-            addPersonToDay(id, date, availability)
-        }
-    }
 
     /**
      * Changes only the general amount of tasks. Does not work, if there would be less general tasks

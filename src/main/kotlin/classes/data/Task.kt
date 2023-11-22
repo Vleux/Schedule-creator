@@ -1,5 +1,6 @@
 package classes.data
 
+import classes.enums.Fairness
 import classes.time.Date
 import classes.time.Time
 import objects.IdKeeper
@@ -24,6 +25,7 @@ class Task(
     private var _excludesTasks: Array<String> = incompatibleTasks
     private var _excludedBy: Array<String> = excludedBy
     private var _driver: Boolean = driver
+    private var _children: ArrayList<String> = arrayListOf()
     var requiredFairness: Fairness = Fairness.LOW
     // Constructors
 
