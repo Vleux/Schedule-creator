@@ -1,7 +1,6 @@
 package classes.data
 
 import classes.time.Date
-import classes.time.Dates
 import classes.time.WorkDays
 import objects.IdKeeper
 import objects.NationBackend
@@ -17,13 +16,16 @@ class Person: Comparable<Person>{
     private var _dateOfBirth: Date
     private var _nationality: String = ""
         set(value){
-            field = NationBackend.parseNation(value)
+            val nation = NationBackend.parseNation(value)
+            if (nation != null){
+                field = nation
+            }
         }
     private var _drivingLicense: Boolean
     private var _visit: WorkDays
     private var _freeFromDuty: Boolean
     private var myTasks: MutableMap<String, Date> = mutableMapOf()
-    // Constructors
+    var timePercentage: Double = -1.0
 
     public constructor(
         surname: String,

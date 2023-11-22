@@ -1,7 +1,6 @@
 package classes.data
 
 import classes.time.Date
-import classes.time.WorkDays
 import objects.People
 
 class PersonLists {
@@ -11,7 +10,7 @@ class PersonLists {
     }
 
     // saves the people that are available on that day. The ones that are arriving/leaving and the ones that are there the whole day
-    private lateinit var peopleAvailable: MutableMap< Date, MutableMap< Availability, ArrayList<String> > >
+    private lateinit var peopleAvailable: MutableMap< Date, MutableMap< Availability, NationList > >
     // Saves the amount of general tasks in relation to the persons
     private lateinit var genTasksPerPerson: HashMap<Int, ArrayList<String>>
     // Saves the amount of high fairness tasks in relation to the persons
@@ -74,13 +73,15 @@ class PersonLists {
      */
     private fun addPersonToDay(id: String, date: Date, availability: Availability){
         if (this.peopleAvailable[date]?.get(availability) != null){
-            this.peopleAvailable[date]!![availability]!!.add(id)
+            this.peopleAvailable[date]!![availability]!!.addPerson(People.getPersonById(id)!!.nationality, id)
 
         }else if (this.peopleAvailable[date] != null){
-            this.peopleAvailable[date]!![availability] = arrayListOf(id)
+            this.peopleAvailable[date]!![availability] = NationList()
+            addPersonToDay(id, date, availability)
 
         }else{
-            this.peopleAvailable[date] = mutableMapOf(Pair(availability, arrayListOf(id)))
+            this.peopleAvailable[date] = mutableMapOf(Pair(availability, NationList()))
+            addPersonToDay(id, date, availability)
         }
     }
 

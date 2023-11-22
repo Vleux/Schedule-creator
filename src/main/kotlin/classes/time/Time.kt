@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter
  */
 class Time (
     time: String
-) {
+): Comparable<Time> {
 
     private val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("kk:mm")
     private val time: LocalTime = LocalTime.parse(time, formatter)
@@ -20,6 +20,16 @@ class Time (
     fun changeTime(hours: Long, minutes: Long){
         this.time.plusHours(hours)
         this.time.plusMinutes(minutes)
+    }
+
+    override fun compareTo(other: Time): Int {
+        return if (other.time > this.time){
+            -1
+        }else if (this.time > other.time){
+            1
+        }else{
+            0
+        }
     }
 
     override fun toString(): String {

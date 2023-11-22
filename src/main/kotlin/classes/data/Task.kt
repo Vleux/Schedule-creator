@@ -1,7 +1,7 @@
 package classes.data
 
-import classes.time.Time
 import classes.time.Date
+import classes.time.Time
 import objects.IdKeeper
 import objects.Tasks
 
@@ -19,11 +19,12 @@ class Task(
     private var _id: String
 
     private var _name: String = name
-    private var _numberOfPeople: Int = numberOfPeople
+    private var _numberOfPeople: Int = numberOfPeople       // The amount of people that are required for this task
     private var _dateTime: Map<Date, Array<Time>> = dateTime
     private var _excludesTasks: Array<String> = incompatibleTasks
     private var _excludedBy: Array<String> = excludedBy
     private var _driver: Boolean = driver
+    var requiredFairness: Fairness = Fairness.LOW
     // Constructors
 
     // Masks and getters

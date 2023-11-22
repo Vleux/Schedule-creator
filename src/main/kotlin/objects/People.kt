@@ -27,6 +27,10 @@ object People {
         return this.people[id]
     }
 
+    fun getNumberOfPeople(): Int{
+        return this.people.size
+    }
+
     /**
      * Removes a person from the people-map if it does exist.
      */

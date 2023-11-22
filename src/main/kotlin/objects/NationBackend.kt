@@ -23,11 +23,11 @@ object NationBackend {
     /**
      * checks if a Nation is valid and returns the nation, the first Letter is capitalized
      */
-    fun parseNation(nation: String): String{
+    fun parseNation(nation: String): String?{
         return if (validNation(nation)){
             nation.lowercase().replaceFirstChar { it.uppercase() }
         }else{
-            "invalid"
+            null
         }
     }
 }
