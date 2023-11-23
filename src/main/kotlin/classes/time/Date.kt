@@ -32,7 +32,7 @@ class Date (
     }
 
     /**
-     * Changes the Date ans saves the result
+     * Changes the Date and saves the result
      */
     fun changeDate(days: Long){
         this.date = returnChangedDate(days)
@@ -50,6 +50,12 @@ class Date (
      */
     fun daysUntil(otherDate: Date): Long{
         return ChronoUnit.DAYS.between(otherDate.date, this.date)
+    }
+
+    fun copy(): Date{
+        return Date(
+            this.date.toString()
+        )
     }
 
     override fun compareTo(other: Date): Int {

@@ -24,7 +24,7 @@ class Person: Comparable<Person>{
     private var _drivingLicense: Boolean
     private var _visit: WorkDays
     private var _freeFromDuty: Boolean
-    private var myTasks: MutableMap<String, Date> = mutableMapOf()
+    private var _myTasks: MutableMap<String, Date> = mutableMapOf()
     var timePercentage: Double = -1.0       // Saves the relative amount of time the person is present
 
     public constructor(
@@ -100,22 +100,25 @@ class Person: Comparable<Person>{
             this._freeFromDuty = free
         }
 
+    val myTasks: MutableMap<String, Date>
+        get() = this._myTasks
+
     fun addTask(taskId: String, date: Date){
-        if (myTasks[taskId] == null){
-            this.myTasks[taskId] = date
+        if (_myTasks[taskId] == null){
+            this._myTasks[taskId] = date
         }
     }
 
     fun removeTask(taskId: String){
-        if (myTasks[taskId] != null){
-            myTasks.remove(taskId)
+        if (_myTasks[taskId] != null){
+            _myTasks.remove(taskId)
         }
     }
 
-    fun getTasksWithDate(): MutableMap<String, Date>{return this.myTasks}
+    fun getTasksWithDate(): MutableMap<String, Date>{return this._myTasks}
 
     fun getJustTaskIDs(): Array<String>{
-        return this.myTasks.keys.toTypedArray()
+        return this._myTasks.keys.toTypedArray()
     }
 
     // Overriding some functions

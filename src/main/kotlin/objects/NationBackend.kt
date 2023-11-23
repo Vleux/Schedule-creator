@@ -8,7 +8,7 @@ object NationBackend {
     }
 
     /**
-     * Deletes a Natoin if it is valid
+     * Deletes a Nation if it is valid
      */
     fun deleteNation(obsoleteNation: String){
         if (this.validNation(obsoleteNation)){
@@ -29,5 +29,9 @@ object NationBackend {
         }else{
             null
         }
+    }
+
+    fun getAllNations(): Array<String>{
+        return this.Nations.toTypedArray()
     }
 }

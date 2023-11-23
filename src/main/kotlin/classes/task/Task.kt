@@ -1,15 +1,16 @@
-package classes.data
+package classes.task
 
 import classes.enums.Fairness
 import classes.time.Date
 import classes.time.Time
 import objects.IdKeeper
+import objects.Schedule
 import objects.Tasks
 
 class Task(
     name: String,
     numberOfPeople: Int,
-    dateTime: Map<Date, Array<Time>>,
+    dateTime: Map<Date, Array<Pair<Time, Time>>>,
     incompatibleTasks: Array<String> = emptyArray(),
     excludedBy: Array<String> = emptyArray(),
     driver: Boolean = false
@@ -21,11 +22,11 @@ class Task(
 
     private var _name: String = name
     private var _numberOfPeople: Int = numberOfPeople       // The amount of people that are required for this task
-    private var _dateTime: Map<Date, Array<Time>> = dateTime
+    private var _dateTime: Map<Date, Array<Pair<Time, Time>>> = dateTime
     private var _excludesTasks: Array<String> = incompatibleTasks
     private var _excludedBy: Array<String> = excludedBy
     private var _driver: Boolean = driver
-    private var _children: ArrayList<String> = arrayListOf()
+    private var _children: Array<String> = arrayOf()
     var requiredFairness: Fairness = Fairness.LOW
     // Constructors
 
@@ -45,7 +46,7 @@ class Task(
                 this._numberOfPeople = numb
             }
         }
-    var dateTime: Map<Date, Array<Time>>
+    var dateTime: Map<Date, Array<Pair<Time, Time>>>
         get() = this._dateTime
         set(new){
             if (new.keys.size > 0){
@@ -63,6 +64,8 @@ class Task(
         }
     val id: String
         get() = this._id
+    val children: Array<String>
+        get() = this._children
 
     /**
      * Adds an task that is excluded by this Task.
@@ -112,13 +115,32 @@ class Task(
     /**
      * Returns all the Time when it should happen on a specified day
      */
-    fun getTimeOnDate(date: Date): Array<Time>{
+    fun getTimeOnDate(date: Date): Array<Pair<Time, Time>>{
         return if (this.dateTime[date] != null) {
             this.dateTime[date]!!
         }
         else{
             emptyArray()
         }
+    }
+
+    fun schedule(takenPeople: Array<String> = emptyArray()){
+        val sTasks: ArrayList<String> = arrayListOf()
+        for (date in this.dateTime){
+            for (time in date.value){
+                sTasks.add(Schedule.addScheduledTask(
+                    date.key,
+                    this.id,
+                    time,
+                    takenPeople,
+                ))
+            }
+        }
+        this._children = sTasks.toTypedArray()
+    }
+
+    fun isChild(childId: String): Boolean{
+        return this.children.contains(childId)
     }
 
     override fun hashCode(): Int {

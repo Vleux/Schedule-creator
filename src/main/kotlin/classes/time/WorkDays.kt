@@ -14,6 +14,7 @@ class WorkDays(
     init {
         this.timeOfArrival = timeOfArrival
         this.timeOfLeave = timeOfLeave
+
     }
 
     // Manages Free Days (Adding, deleting, getting)

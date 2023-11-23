@@ -1,7 +1,8 @@
 package objects
 
-import classes.data.ScheduledTask
+import classes.task.ScheduledTask
 import classes.time.Date
+import classes.time.Time
 
 object Schedule {
     private val days: MutableMap<Date, ArrayList<String>> = mutableMapOf()
@@ -88,18 +89,26 @@ object Schedule {
      * If the date does not exist, it will be created
      * @return false if the id is already used
      */
-    fun addScheduledTask(date: Date, task: ScheduledTask): Boolean{
-        if (ids.contains(task.id)){
-            return false
-        }
+    fun addScheduledTask(
+        date: Date,
+        parentTaskId: String,
+        time: Pair<Time, Time>,
+        takenPeople: Array<String>
+    ): String {
+        val newSTask = ScheduledTask(
+            time,
+            parentTaskId,
+            takenPeople
+        )
+        this.ids[newSTask.id] = newSTask
+
         if (this.days[date] == null){
-            this.days[date] = arrayListOf(task.id)
+            this.days[date] = arrayListOf(this.ids[newSTask.id]!!.id)
         }else{
-            this.days[date]!!.add(task.id)
+            this.days[date]!!.add(this.ids[newSTask.id]!!.id)
         }
 
-        this.ids[task.id] = task
-        return true
+        return newSTask.id
     }
 
     fun removeScheduledTask(date: Date, task: ScheduledTask): Boolean{
@@ -131,4 +140,39 @@ object Schedule {
         return this.ids.contains(taskId)
     }
 
+    /**
+     * Returns the scheduled Tasks of an abstract task.
+     * Returns a Map of <ID, Date>
+     */
+    fun getScheduledTasksOf(abstractTaskId: String): Map<String, Date>{
+        val parentTask = Tasks.getTask(abstractTaskId) ?: return emptyMap()
+        val result = mutableMapOf<String, Date>()
+        for (day in days){
+            for (id in day.value){
+                if (parentTask.isChild(id)){
+                    result.plus(Pair(id, day.key))
+                }
+            }
+        }
+        return result
+    }
+
+    /**
+     * Returns the date of a scheduled task
+     */
+    fun getDateOfScheduledTask(scheduledTaskId: String): Date?{
+        for (date in this.days.keys){
+            if (this.days[date]!!.contains(scheduledTaskId)){
+                return date
+            }
+        }
+        return null
+    }
+
+    /**
+     * Returns all ids of all the scheduled Tasks
+     */
+    fun getAllTasks(): Array<String>{
+        return this.ids.keys.toTypedArray()
+    }
 }

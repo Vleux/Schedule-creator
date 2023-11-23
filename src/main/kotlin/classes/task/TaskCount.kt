@@ -1,4 +1,4 @@
-package classes.data
+package classes.task
 
 class TaskCount {
     private var _generalTasks: Int = 0
@@ -22,6 +22,15 @@ class TaskCount {
         set (new: Int){
             val cache = new - mediumFairnessTasks
             if (mediumFairnessTasks + new > 0){
+                this._generalTasks += cache
+                field = new
+            }
+        }
+
+    var lowFairnessTasks: Int = 0
+        set (new: Int){
+            val cache = new-lowFairnessTasks
+            if (lowFairnessTasks + new > 0){
                 this._generalTasks += cache
                 field = new
             }
