@@ -145,12 +145,14 @@ object Schedule {
      * Returns a Map of <ID, Date>
      */
     fun getScheduledTasksOf(abstractTaskId: String): Map<String, Date>{
-        val parentTask = Tasks.getTask(abstractTaskId) ?: return emptyMap()
+        val parentTask = Tasks.getTask(abstractTaskId) ?: throw Error("Could not find abstract task")
+
         val result = mutableMapOf<String, Date>()
         for (day in days){
+            println(day)
             for (id in day.value){
                 if (parentTask.isChild(id)){
-                    result.plus(Pair(id, day.key))
+                    result[id] = day.key
                 }
             }
         }

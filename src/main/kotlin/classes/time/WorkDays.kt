@@ -14,7 +14,6 @@ class WorkDays(
     init {
         this.timeOfArrival = timeOfArrival
         this.timeOfLeave = timeOfLeave
-
     }
 
     // Manages Free Days (Adding, deleting, getting)
@@ -39,7 +38,8 @@ class WorkDays(
     fun getWorkDays(): Array<Date>{
         val workDays: MutableList<Date> = mutableListOf()
 
-        val day = this.firstDay
+        val day = this.firstDay.copy()
+        val last = this.lastDay.copy()
         while (day <= this.lastDay){
             if (!this.freeDays.contains(day)){
                 workDays.add(day)
@@ -59,8 +59,8 @@ class WorkDays(
            null
         }else {
             Dates(
-                Date.toDate(this.firstDay.returnChangedDate(1)),
-                Date.toDate(this.lastDay.returnChangedDate(-1))
+                this.firstDay,
+                this.lastDay
             )
         }
     }

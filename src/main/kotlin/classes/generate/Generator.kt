@@ -29,18 +29,29 @@ class Generator {
     fun start(){
         // calculations previous to generatino
         this.calculateLimits()
+        println(
+            """
+                ${this.limits.getGeneralLimit()}
+                ${this.limits.getMaximalFairnessLimit()}
+                ${this.limits.getMediumFairnessLimit()}
+            """.trimIndent()
+        )
         this.peopleAvailable.boot()
         this.sortTasks()
+        println("Limits calculated")
 
         // Generation
         this.scheduleMaximalFairnessTasks()
         this.checkCompleteSatisfiedTasks()
+        println("maxFairness calculated")
 
         this.scheduleMediumFairnessTasks()
         this.checkCompleteSatisfiedTasks()
+        println("medFairness calculated")
 
         this.scheduleLowFairnessTasks()
         this.checkCompleteSatisfiedTasks()
+        println("lowFairness calculated")
     }
 
 
@@ -48,6 +59,9 @@ class Generator {
      * Calculates the Limits while ensuring that the Limits are not too low
      */
     private fun calculateLimits(){
+        println()
+        println("-#-#-#-#-#-#-#-#-#-#-#-#")
+        println()
         // Calculate the Amount of Tasks (appearance of a Task * needed People)
         var allTaskCount = 0
         var maxFairnessTaskCount = 0
@@ -66,6 +80,7 @@ class Generator {
             count *= task.numberOfPeople
             allTaskCount += count
 
+
             when (task.requiredFairness){
                 Fairness.LOW -> lowFairnessTaskCount += count
                 Fairness.MEDIUM -> medFairnessTaskCount += count
@@ -83,23 +98,43 @@ class Generator {
         // Calculate the Limits (task / amountOfPeople)
 
         val amountOfPeople = this.getAmountOfPeople()
-        var genLimit = allTaskCount / amountOfPeople
-        var maxFairLimit = maxFairnessTaskCount / amountOfPeople
-        var medFairLimit = medFairnessTaskCount / amountOfPeople
+
+        var genLimit = (allTaskCount).toDouble() / (amountOfPeople).toDouble()
+        var maxFairLimit = (maxFairnessTaskCount).toDouble() / (amountOfPeople).toDouble()
+        var medFairLimit: Double = (medFairnessTaskCount).toDouble() / (amountOfPeople).toDouble()
+        var lowFairLimit = (lowFairnessTaskCount).toDouble() / (amountOfPeople).toDouble()
+        println(medFairLimit)
+        println(genLimit - maxFairLimit - medFairLimit)
 
         // Checks that the Limit is not too small - if it is it will be increased
         while (genLimit * amountOfPeople < allTaskCount){genLimit++}
         while (maxFairLimit * amountOfPeople < maxFairnessTaskCount){maxFairLimit++}
         while (medFairLimit * amountOfPeople < medFairnessTaskCount){medFairLimit++}
+        while (lowFairLimit * amountOfPeople < lowFairnessTaskCount){lowFairLimit++}
+
+        if (genLimit.toInt().toDouble() != genLimit){
+            genLimit++
+        }
+        if (maxFairLimit.toInt().toDouble() != maxFairLimit){
+            maxFairLimit++
+        }
+        if (medFairLimit.toInt().toDouble() != medFairLimit){
+            medFairLimit++
+        }
+        if (lowFairLimit.toInt().toDouble() != lowFairLimit){
+            lowFairLimit++
+        }
 
         // Save the Limits
         this.limits = Limit(
-            genLimit,
-            maxFairLimit,
-            medFairLimit
+            genLimit.toInt(),
+            maxFairLimit.toInt(),
+            medFairLimit.toInt(),
+            lowFairLimit.toInt()
         )
-
-
+        println()
+        println("####")
+        println()
     }
 
     /**
@@ -124,7 +159,8 @@ class Generator {
                 lastDay = People.getPersonById(id)!!.visit.getLastDay()
             }
         }
-        this.maxTime = WorkDays(firstDay, Time("00:00"), lastDay, Time("00:00")).getWorkDays().size - 1
+
+        this.maxTime = WorkDays(firstDay, Time("01:00"), lastDay, Time("23:00")).getWorkDays().size
 
         /*
         Calculates the available Work time (the amount of people).
@@ -207,6 +243,7 @@ class Generator {
                     nationTarget[nation] = Double.MAX_VALUE
                 }
                 val limit = Limit(
+                    Int.MAX_VALUE,
                     Int.MAX_VALUE,
                     Int.MAX_VALUE,
                     Int.MAX_VALUE
@@ -332,7 +369,7 @@ class Generator {
                     val schedTask = Schedule.getScheduledTask(entry.key)!!
                     // get available people
                     val avPeople = this.peopleAvailable.getAvailablePeople(date)
-                    if (avPeople.size == 0){
+                    if (avPeople.isEmpty()){
                         throw NoPersonAvailable("A task is scheduled on a date where no person is visiting.\nExiting program ...")
                     }
                     // Get the available people in reference to their Nations & calculate the ratio
@@ -353,7 +390,7 @@ class Generator {
                         Fairness.MEDIUM,
                         schedTask.id,
                         ratio,
-                        this.limits
+                        this .limits
                     ) ?: throw NoPersonAvailable("Something went wrong while searching for available persons. Please fix")
 
                     for (person in people){
@@ -401,7 +438,7 @@ class Generator {
 
                     // get available people
                     val avPeople = this.peopleAvailable.getAvailablePeople(date)
-                    if (avPeople.size == 0){
+                    if (avPeople.isEmpty()){
                         throw NoPersonAvailable("A task is scheduled on a date where no person is visiting.\nExiting program ...")
                     }
                     // Get the available people in reference to their Nations & calculate the ratio

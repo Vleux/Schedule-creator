@@ -5,7 +5,8 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
 class Date (
-    date: String
+    date: String,
+    formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
 ) : Comparable<Date> {
 
     companion object {
@@ -15,7 +16,7 @@ class Date (
         /**
          * Casts a LocalDate to a Date
          */
-        fun toDate(date: LocalDate): Date {
+        fun toDate(date: LocalDate, formatter: DateTimeFormatter = this.formatter): Date {
             return Date (
                 formatter.format(date)
             )
@@ -54,7 +55,8 @@ class Date (
 
     fun copy(): Date{
         return Date(
-            this.date.toString()
+            this.date.toString(),
+            DateTimeFormatter.ofPattern("yyyy-MM-dd")
         )
     }
 

@@ -2,6 +2,7 @@ package main
 
 
 import classes.data.Person
+import classes.enums.Fairness
 import classes.generate.Generator
 import classes.task.Task
 import classes.time.Date
@@ -12,6 +13,12 @@ import objects.Schedule
 import objects.Tasks
 
 fun main() {
+   tryProgram()
+
+}
+
+fun tryProgram(){
+    //TODO Find the infinite loop
     People.addPerson(
         Person(
             "Fritz",
@@ -59,12 +66,13 @@ fun main() {
                 Pair(
                     Date("06-01-2024"),
                     arrayOf(Pair(Time("16:00"), Time("18:00")))
-            ),
+                ),
 
-        ),
+                ),
             arrayOf(),
-            arrayOf()
-    ))
+            arrayOf(),
+            Fairness.MEDIUM
+        ))
     Tasks.addTask(
         Task(
             "OtherTask",
@@ -73,7 +81,7 @@ fun main() {
                 Pair(
                     Date("03-01-2024"),
                     arrayOf(Pair(Time("12:00"), Time("18:00")))
-                    ),
+                ),
                 Pair(
                     Date("04-01-2024"),
                     arrayOf(Pair(Time("13:00"), Time("20:00")))
@@ -128,6 +136,7 @@ fun main() {
     println("Created")
 
     val gen = Generator()
+    println("Starting ...")
     gen.start()
 
     println("Generated")

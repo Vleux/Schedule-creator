@@ -13,6 +13,7 @@ class Task(
     dateTime: Map<Date, Array<Pair<Time, Time>>>,
     incompatibleTasks: Array<String> = emptyArray(),
     excludedBy: Array<String> = emptyArray(),
+    requiredFairness: Fairness = Fairness.LOW,
     driver: Boolean = false
 ) : Comparable<Task>{
 
@@ -27,7 +28,7 @@ class Task(
     private var _excludedBy: Array<String> = excludedBy
     private var _driver: Boolean = driver
     private var _children: Array<String> = arrayOf()
-    var requiredFairness: Fairness = Fairness.LOW
+    var requiredFairness: Fairness = requiredFairness
     // Constructors
 
     // Masks and getters
