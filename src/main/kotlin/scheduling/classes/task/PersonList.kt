@@ -1,14 +1,14 @@
-package classes.task
+package scheduling.classes.task
 
-import classes.data.Limit
-import classes.enums.Availability
-import classes.enums.Fairness
-import classes.time.Date
-import classes.time.Time
-import objects.NationBackend
-import objects.People
-import objects.Schedule
-import objects.Tasks
+import scheduling.classes.data.Limit
+import scheduling.classes.enums.Availability
+import scheduling.classes.enums.Fairness
+import scheduling.classes.time.Date
+import scheduling.classes.time.Time
+import scheduling.objects.NationBackend
+import scheduling.objects.People
+import scheduling.objects.Schedule
+import scheduling.objects.Tasks
 import kotlin.math.roundToInt
 
 class PersonList {
@@ -374,7 +374,7 @@ class PersonList {
 
         // Inspecting. If a concurrency is found, false is returned
 
-        // Inspecting the excluded Tasks.
+        // Inspecting the excluded Tasks.csv.
         for (taskId in inspectTasks){
             val tryDate = date.copy()
             val task = Schedule.getScheduledTask(taskId)

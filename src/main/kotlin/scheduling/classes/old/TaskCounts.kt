@@ -1,7 +1,7 @@
-package classes.old
+package scheduling.classes.old
 
-import classes.task.TaskCount
-import objects.People
+import scheduling.classes.task.TaskCount
+import scheduling.objects.People
 
 class TaskCounts {
 
@@ -9,7 +9,7 @@ class TaskCounts {
     private lateinit var genTasksPerPerson: HashMap<Int, ArrayList<String>>
     // Saves the amount of high fairness tasks in relation to the persons
     private lateinit var maxFairnessPerPerson: HashMap<Int, ArrayList<String>>
-    // Saves the amount of medFairness Tasks in relation to the persons
+    // Saves the amount of medFairness Tasks.csv in relation to the persons
     private lateinit var medFairnessPerPerson: HashMap<Int, ArrayList<String>>
 
     // Saves the Persons with reference to their tasks

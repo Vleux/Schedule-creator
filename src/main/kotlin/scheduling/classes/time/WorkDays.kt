@@ -1,4 +1,4 @@
-package classes.time
+package scheduling.classes.time
 
 class WorkDays(
     arrival: Date,

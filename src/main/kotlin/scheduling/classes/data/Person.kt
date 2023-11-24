@@ -1,9 +1,9 @@
-package classes.data
+package scheduling.classes.data
 
-import classes.time.Date
-import classes.time.WorkDays
-import objects.IdKeeper
-import objects.NationBackend
+import scheduling.classes.time.Date
+import scheduling.classes.time.WorkDays
+import scheduling.objects.IdKeeper
+import scheduling.objects.NationBackend
 import java.time.LocalDate
 
 class Person: Comparable<Person>{
@@ -28,7 +28,7 @@ class Person: Comparable<Person>{
     var timePercentage: Double = -1.0       // Saves the relative amount of time the person is present
 
     public constructor(
-        surname: String,
+        firstame: String,
         lastname: String,
         dateOfBirth: Date,
         nation: String,
@@ -37,7 +37,7 @@ class Person: Comparable<Person>{
         freeFromDuty: Boolean = false
     ){
 
-        this._firstname = surname
+        this._firstname = firstname
         this._lastname = lastname
         this._dateOfBirth = dateOfBirth
         this._nationality = nation

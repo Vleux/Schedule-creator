@@ -1,4 +1,4 @@
-package classes.enums
+package scheduling.classes.enums
 
 enum class Fairness{
     MAXIMUM,

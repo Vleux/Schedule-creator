@@ -1,7 +1,7 @@
-package classes.data
+package scheduling.classes.data
 
 /**
- * This class saves the Limits of Tasks in the different Categories.
+ * This class saves the Limits of Tasks.csv in the different Categories.
  * These are general, maximum fairness and medium fairness.
  */
 class Limit(generalLimit: Int, maxFairLimit: Int, medFairLimit: Int, lowFairLimit: Int) {

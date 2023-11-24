@@ -1,4 +1,4 @@
-package classes.task
+package scheduling.classes.task
 
 class TaskCount {
     private var _generalTasks: Int = 0

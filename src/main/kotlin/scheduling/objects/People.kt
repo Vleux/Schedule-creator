@@ -1,8 +1,8 @@
-package objects
+package scheduling.objects
 
-import classes.data.Person
-import classes.time.Date
-import classes.time.WorkDays
+import scheduling.classes.data.Person
+import scheduling.classes.time.Date
+import scheduling.classes.time.WorkDays
 
 object People {
     private var people: MutableMap<String, Person> = mutableMapOf()
@@ -12,72 +12,72 @@ object People {
      * Returns true on success, false if the person does already exist.
      */
     fun addPerson(person: Person): Boolean{
-        if (this.people[person.id] == null){
-            this.people[person.id] = person
+        if (people[person.id] == null){
+            people[person.id] = person
             return true
         }
         return false
     }
 
     fun getAllPeopleIDs(): Array<String>{
-        return this.people.keys.toTypedArray()
+        return people.keys.toTypedArray()
     }
 
     fun getPersonById(id: String): Person?{
-        return this.people[id]
+        return people[id]
     }
 
     fun getNumberOfPeople(): Int{
-        return this.people.size
+        return people.size
     }
 
     /**
      * Removes a person from the people-map if it does exist.
      */
     fun removePerson(personId: String){
-        this.people.remove(personId)
+        people.remove(personId)
     }
 
     fun doesPersonExist(personId: String): Boolean{
-        return this.people[personId] != null
+        return people[personId] != null
     }
 
     /**Change a Persons properties **/
 
     fun changePersonFirstname(id: String, newFirstname: String){
-        this.people[id]?.firstname = newFirstname
+        people[id]?.firstname = newFirstname
     }
 
     fun changePersonLastname(id: String, newLastname: String){
-        this.people[id]?.lastname = newLastname
+        people[id]?.lastname = newLastname
     }
 
     fun changeDateOfBirth(id: String, newDateOfBirth: Date){
-        this.people[id]?.dateOfBirth = newDateOfBirth
+        people[id]?.dateOfBirth = newDateOfBirth
     }
 
     fun changeNationality(id: String, newNation: String){
-        this.people[id]?.nationality = newNation
+        people[id]?.nationality = newNation
     }
 
     fun changeDrivingLicense(id: String, drivingLicense: Boolean){
-        this.people[id]?.drivingLicense = drivingLicense
+        people[id]?.drivingLicense = drivingLicense
     }
 
     fun changeVisit(id:String, newVisit: WorkDays){
-        this.people[id]?.visit = newVisit
+        people[id]?.visit = newVisit
     }
 
     fun changeFreeFromDuty(id: String, newFreeFromDuty: Boolean){
-        this.people[id]?.freeFromDuty = newFreeFromDuty
+        people[id]?.freeFromDuty = newFreeFromDuty
     }
 
     fun addTask(personId: String, taskId: String, date: Date){
-        this.people[personId]?.addTask(taskId, date)
+        people[personId]?.addTask(taskId, date)
     }
 
     fun removeTask(personId: String, taskId: String){
-        this.people[personId]?.removeTask(taskId)
+        people[personId]?.removeTask(taskId)
     }
 
 }

@@ -1,4 +1,4 @@
-package classes.time
+package scheduling.classes.time
 
 open class Dates(
     @JvmField protected var firstDay: Date,

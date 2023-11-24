@@ -1,9 +1,9 @@
-package classes.task
+package scheduling.classes.task
 
-import classes.time.Time
-import objects.IdKeeper
-import objects.People
-import objects.Tasks
+import scheduling.classes.time.Time
+import scheduling.objects.IdKeeper
+import scheduling.objects.People
+import scheduling.objects.Tasks
 
 /**
  * DO NOT USE THE OPTION TO GIVE THE ID YOURSELF IF POSSIBLE

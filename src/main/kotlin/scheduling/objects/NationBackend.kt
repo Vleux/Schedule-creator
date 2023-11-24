@@ -1,4 +1,4 @@
-package objects
+package scheduling.objects
 
 object NationBackend {
     private var Nations: ArrayList<String> = arrayListOf("macedonia", "germany")
@@ -11,8 +11,8 @@ object NationBackend {
      * Deletes a Nation if it is valid
      */
     fun deleteNation(obsoleteNation: String){
-        if (this.validNation(obsoleteNation)){
-            this.Nations.remove(this.parseNation(obsoleteNation))
+        if (validNation(obsoleteNation)){
+            Nations.remove(parseNation(obsoleteNation))
         }
     }
 
@@ -32,6 +32,6 @@ object NationBackend {
     }
 
     fun getAllNations(): Array<String>{
-        return this.Nations.toTypedArray()
+        return Nations.toTypedArray()
     }
 }

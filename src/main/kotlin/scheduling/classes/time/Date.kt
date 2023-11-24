@@ -1,4 +1,4 @@
-package classes.time
+package scheduling.classes.time
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -16,7 +16,7 @@ class Date (
         /**
          * Casts a LocalDate to a Date
          */
-        fun toDate(date: LocalDate, formatter: DateTimeFormatter = this.formatter): Date {
+        fun toDate(date: LocalDate, formatter: DateTimeFormatter = Companion.formatter): Date {
             return Date (
                 formatter.format(date)
             )
@@ -53,7 +53,7 @@ class Date (
         return ChronoUnit.DAYS.between(otherDate.date, this.date)
     }
 
-    fun copy(): Date{
+    fun copy(): Date {
         return Date(
             this.date.toString(),
             DateTimeFormatter.ofPattern("yyyy-MM-dd")

@@ -1,10 +1,10 @@
-package classes.time
+package scheduling.classes.time
 
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 /**
- * Deals with the time, that is needed for Scheduling the Tasks
+ * Deals with the time, that is needed for Scheduling the Tasks.csv
  */
 class Time (
     time: String

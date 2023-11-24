@@ -1,13 +1,13 @@
-package objects
+package scheduling.objects
 
-import classes.task.Task
+import scheduling.classes.task.Task
 
 object Tasks {
 
     private val allTasks: ArrayList<Task> = arrayListOf()
 
     fun doesTaskExist(taskId: String): Boolean{
-        for (task in this.allTasks){
+        for (task in allTasks){
             if (task.id == taskId){
                 return true
             }
@@ -16,7 +16,7 @@ object Tasks {
     }
 
     fun getTask(taskId: String): Task?{
-        for (task in this.allTasks){
+        for (task in allTasks){
             if (task.id == taskId){
                 return task
             }
@@ -25,17 +25,17 @@ object Tasks {
     }
 
     fun getAllTasks(): ArrayList<Task>{
-        return this.allTasks
+        return allTasks
     }
 
     /**
-     * Adds a new Task to all Tasks.
+     * Adds a new Task to all Tasks.csv.
      * True -> Successfully added
      * False -> Task with same id does already exist
      */
     fun addTask(newTask: Task): Boolean{
-        return if (!this.doesTaskExist(newTask.id)){
-            this.allTasks.add(newTask)
+        return if (!doesTaskExist(newTask.id)){
+            allTasks.add(newTask)
             true
         }else{
             false
@@ -47,9 +47,9 @@ object Tasks {
      * false if it does not exist on the firsthand
      */
     fun removeTask(oldTaskId: String): Boolean{
-        for (task in this.allTasks){
+        for (task in allTasks){
             if (task.id == oldTaskId){
-                this.allTasks.remove(task)
+                allTasks.remove(task)
                 return true
             }
         }

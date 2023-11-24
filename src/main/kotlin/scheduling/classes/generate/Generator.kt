@@ -1,16 +1,16 @@
-package classes.generate
+package scheduling.classes.generate
 
-import classes.Exceptions.NoPersonAvailable
-import classes.data.Limit
-import classes.enums.Fairness
-import classes.task.PersonList
-import classes.time.Date
-import classes.time.Time
-import classes.time.WorkDays
-import objects.NationBackend
-import objects.People
-import objects.Schedule
-import objects.Tasks
+import scheduling.classes.exceptions.NoPersonAvailable
+import scheduling.classes.data.Limit
+import scheduling.classes.enums.Fairness
+import scheduling.classes.task.PersonList
+import scheduling.classes.time.Date
+import scheduling.classes.time.Time
+import scheduling.classes.time.WorkDays
+import scheduling.objects.NationBackend
+import scheduling.objects.People
+import scheduling.objects.Schedule
+import scheduling.objects.Tasks
 import kotlin.properties.Delegates
 
 class Generator {
@@ -62,7 +62,7 @@ class Generator {
         println()
         println("-#-#-#-#-#-#-#-#-#-#-#-#")
         println()
-        // Calculate the Amount of Tasks (appearance of a Task * needed People)
+        // Calculate the Amount of Tasks.csv (appearance of a Task * needed People)
         var allTaskCount = 0
         var maxFairnessTaskCount = 0
         var medFairnessTaskCount = 0
@@ -186,7 +186,7 @@ class Generator {
     }
 
     /**
-     * Sorts the abstract Tasks into fairness categories and saves the amount of tasks they exclude
+     * Sorts the abstract Tasks.csv into fairness categories and saves the amount of tasks they exclude
      */
     private fun sortTasks(){
         val tasks = Tasks.getAllTasks()
@@ -266,7 +266,7 @@ class Generator {
     }
 
     /**
-     * Sorts the Tasks that require the maximal fairness.
+     * Sorts the Tasks.csv that require the maximal fairness.
      * Ensures that incompatible tasks & parallel tasks are avoided.
      */
     private fun scheduleMaximalFairnessTasks(){
@@ -277,7 +277,7 @@ class Generator {
             val tasks = this.maximalFairnessTasks[key]!!
 
             for (taskId in tasks){
-                // create the scheduled Tasks
+                // create the scheduled Tasks.csv
                 val absTask = Tasks.getTask(taskId)!!
                 absTask.schedule()
 
@@ -335,7 +335,7 @@ class Generator {
     }
 
     /**
-     * sorts the Tasks that require a medium fairness
+     * sorts the Tasks.csv that require a medium fairness
      * Same structure as maximal fairness
      */
     private fun scheduleMediumFairnessTasks() {
@@ -346,7 +346,7 @@ class Generator {
             val tasks = this.mediumFairnessTasks[key]!!
 
             for (taskId in tasks){
-                // create the scheduled Tasks
+                // create the scheduled Tasks.csv
                 val absTask = Tasks.getTask(taskId)!!
                 absTask.schedule()
 
@@ -402,7 +402,7 @@ class Generator {
     }
 
     /**
-     * Sorts the Tasks that require a low fairness
+     * Sorts the Tasks.csv that require a low fairness
      * Same structure as maximal fairness
      */
     private fun scheduleLowFairnessTasks() {
@@ -413,7 +413,7 @@ class Generator {
             val tasks = this.lowFairnessTasks[key]!!
 
             for (taskId in tasks){
-                // create the scheduled Tasks
+                // create the scheduled Tasks.csv
                 val absTask = Tasks.getTask(taskId)!!
                 absTask.schedule()
 

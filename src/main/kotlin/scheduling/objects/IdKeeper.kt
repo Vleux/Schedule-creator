@@ -1,4 +1,4 @@
-package objects
+package scheduling.objects
 
 /**
  * Keeps track of the given ID's and creates new ones
@@ -13,20 +13,20 @@ object IdKeeper {
     private var deletedScheduledTaskId: ArrayList<String> = arrayListOf()
 
     fun getNextPersonId(): String {
-        val cache = "Person-${this.nextPersonID}"
-        this.nextPersonID++
+        val cache = "Person-$nextPersonID"
+        nextPersonID++
         return cache
     }
 
     fun getNextTaskId(): String {
-        val cache =  "Task-${this.nextTaskID}"
-        this.nextTaskID++
+        val cache =  "Task-$nextTaskID"
+        nextTaskID++
         return cache
     }
 
     fun getNextScheduledTaskId(): String {
-        val cache = "ScheduledTask-${this.nextScheduledTaskID}"
-        this.nextScheduledTaskID++
+        val cache = "ScheduledTask-$nextScheduledTaskID"
+        nextScheduledTaskID++
         return cache
     }
 
@@ -38,30 +38,30 @@ object IdKeeper {
     fun isIdValid(id: String): Boolean{
         when {
             id.contains("Person-") -> {
-                return if (this.deletedPersonId.contains(id)){
+                return if (deletedPersonId.contains(id)){
                     false
                 }else{
                     val cache = id.subSequence(6, id.length - 1).toString().toUInt()
-                    cache < this.nextPersonID
+                    cache < nextPersonID
                 }
             }
 
             id.contains("ScheduledTask-") -> {
-                return if (this.deletedScheduledTaskId.contains(id)){
+                return if (deletedScheduledTaskId.contains(id)){
                     false
                 }else{
                     val cache = id.subSequence(13, id.length - 1).toString().toUInt()
-                    cache < this.nextScheduledTaskID
+                    cache < nextScheduledTaskID
                 }
 
             }
 
             id.contains("Task-") -> {
-                return if (this.deletedTaskId.contains(id)){
+                return if (deletedTaskId.contains(id)){
                     false
                 }else{
                     val cache = id.subSequence(4, id.length -1).toString().toUInt()
-                    cache < this.nextTaskID
+                    cache < nextTaskID
                 }
 
             }
@@ -73,13 +73,13 @@ object IdKeeper {
 
         when{
             id.contains("Person-") -> {
-                this.deletedPersonId.add(id)
+                deletedPersonId.add(id)
             }
             id.contains("ScheduledTask-") -> {
-                this.deletedScheduledTaskId.add(id)
+                deletedScheduledTaskId.add(id)
             }
             id.contains("Task-") -> {
-                this.deletedTaskId.add(id)
+                deletedTaskId.add(id)
             }
         }
     }
@@ -87,13 +87,13 @@ object IdKeeper {
     fun recreateId(id: String){
         when{
             id.contains("Person-") -> {
-                this.deletedPersonId.remove(id)
+                deletedPersonId.remove(id)
             }
             id.contains("ScheduledTask-") -> {
-                this.deletedScheduledTaskId.remove(id)
+                deletedScheduledTaskId.remove(id)
             }
             id.contains("Task-") -> {
-                this.deletedTaskId.remove(id)
+                deletedTaskId.remove(id)
             }
         }
     }

@@ -1,11 +1,11 @@
-package classes.task
+package scheduling.classes.task
 
-import classes.enums.Fairness
-import classes.time.Date
-import classes.time.Time
-import objects.IdKeeper
-import objects.Schedule
-import objects.Tasks
+import scheduling.classes.enums.Fairness
+import scheduling.classes.time.Date
+import scheduling.classes.time.Time
+import scheduling.objects.IdKeeper
+import scheduling.objects.Schedule
+import scheduling.objects.Tasks
 
 class Task(
     name: String,
@@ -13,32 +13,30 @@ class Task(
     dateTime: Map<Date, Array<Pair<Time, Time>>>,
     incompatibleTasks: Array<String> = emptyArray(),
     excludedBy: Array<String> = emptyArray(),
-    requiredFairness: Fairness = Fairness.LOW,
+    var requiredFairness: Fairness = Fairness.LOW,
     driver: Boolean = false
 ) : Comparable<Task>{
 
     // Attributes
 
-    private var _id: String
+    private var _id: String = IdKeeper.getNextTaskId()
 
     private var _name: String = name
-    private var _numberOfPeople: Int = numberOfPeople       // The amount of people that are required for this task
+    private var _numberOfPeople: Int = numberOfPeople       // The number of people that are required for this task
     private var _dateTime: Map<Date, Array<Pair<Time, Time>>> = dateTime
     private var _excludesTasks: Array<String> = incompatibleTasks
     private var _excludedBy: Array<String> = excludedBy
     private var _driver: Boolean = driver
     private var _children: Array<String> = arrayOf()
-    var requiredFairness: Fairness = requiredFairness
     // Constructors
 
     // Masks and getters
 
-    var name: String
+    var name: String = ""
         get() = this._name
         set(name) {
-            if (name.length > 2){
-                this.name = name
-            }
+            if (name.length > 2) this._name = name
+            field = name
         }
     var numberOfPeople: Int
         get() = this._numberOfPeople
@@ -50,7 +48,7 @@ class Task(
     var dateTime: Map<Date, Array<Pair<Time, Time>>>
         get() = this._dateTime
         set(new){
-            if (new.keys.size > 0){
+            if (new.keys.isNotEmpty()){
                 this._dateTime = new
             }
         }
@@ -69,7 +67,7 @@ class Task(
         get() = this._children
 
     /**
-     * Adds an task that is excluded by this Task.
+     * Adds a task excluded by this Task.
      */
     fun addExcludedTask(id: String): Boolean{
         if (Tasks.doesTaskExist(id) && !this.excludesTasks.contains(id) && !this.excludedBy.contains(id)){
@@ -129,7 +127,8 @@ class Task(
         val sTasks: ArrayList<String> = arrayListOf()
         for (date in this.dateTime){
             for (time in date.value){
-                sTasks.add(Schedule.addScheduledTask(
+                sTasks.add(
+                    Schedule.addScheduledTask(
                     date.key,
                     this.id,
                     time,
@@ -148,7 +147,4 @@ class Task(
         return _id.hashCode()
     }
 
-    init {
-        this._id = IdKeeper.getNextTaskId()
-    }
 }

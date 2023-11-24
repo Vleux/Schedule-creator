@@ -1,8 +1,8 @@
-package objects
+package scheduling.objects
 
-import classes.task.ScheduledTask
-import classes.time.Date
-import classes.time.Time
+import scheduling.classes.task.ScheduledTask
+import scheduling.classes.time.Date
+import scheduling.classes.time.Time
 
 object Schedule {
     private val days: MutableMap<Date, ArrayList<String>> = mutableMapOf()
@@ -17,15 +17,15 @@ object Schedule {
     }
 
     private fun lastDay(){
-        for (date in this.days){
+        for (date in days){
             if (lastDay < date.key){
-                this.lastDay = date.key
+                lastDay = date.key
             }
         }
     }
 
     private fun firstDay(){
-        for (date in this.days){
+        for (date in days){
             if (firstDay > date.key){
                 firstDay = date.key
             }
@@ -36,7 +36,7 @@ object Schedule {
      * Adds a "Day". If the ScheduledTasks does already exist (id is registered) they will be removed from the new Day
      */
     fun addDay(date: Date, tasks: ArrayList<ScheduledTask>): Boolean{
-        if (this.days.contains(date)){
+        if (days.contains(date)){
             return false
         }
 
@@ -46,30 +46,30 @@ object Schedule {
             if (ids.contains(task.id)){
                 tasks.remove(task)
             }else{
-                this.ids[task.id] = task
+                ids[task.id] = task
                 newIds.addLast(task.id)
             }
         }
 
-        this.days[date] = newIds.toCollection(ArrayList())
+        days[date] = newIds.toCollection(ArrayList())
 
-        this.firstDay()
-        this.lastDay()
+        firstDay()
+        lastDay()
 
         return true
     }
 
     /**
      * Removes the Date from the Schedule.
-     * The IDs of the Scheduled Tasks are completely deleted (also in the IDKeeper)
+     * The IDs of the Scheduled Tasks.csv are completely deleted (also in the IDKeeper)
      */
     fun deleteDay(date: Date){
-        if (!this.days.keys.contains(date)){
+        if (!days.keys.contains(date)){
             return
         }
 
-        for (id in this.days[date]!!){
-            this.ids.remove(id)
+        for (id in days[date]!!){
+            ids.remove(id)
             IdKeeper.deleteId(id)
         }
 
@@ -81,7 +81,7 @@ object Schedule {
      * Returns the ids of the tasks in a day (if that day does exist)
      */
     fun getDay(date: Date): Array<String>?{
-        return this.days[date]?.toTypedArray()
+        return days[date]?.toTypedArray()
     }
 
     /**
@@ -100,24 +100,24 @@ object Schedule {
             parentTaskId,
             takenPeople
         )
-        this.ids[newSTask.id] = newSTask
+        ids[newSTask.id] = newSTask
 
-        if (this.days[date] == null){
-            this.days[date] = arrayListOf(this.ids[newSTask.id]!!.id)
+        if (days[date] == null){
+            days[date] = arrayListOf(ids[newSTask.id]!!.id)
         }else{
-            this.days[date]!!.add(this.ids[newSTask.id]!!.id)
+            days[date]!!.add(ids[newSTask.id]!!.id)
         }
 
         return newSTask.id
     }
 
     fun removeScheduledTask(date: Date, task: ScheduledTask): Boolean{
-        if (this.days[date] == null || this.ids.contains(task.id)){
+        if (days[date] == null || ids.contains(task.id)){
             return false
         }
 
-        this.days[date]!!.remove(task.id)
-        this.ids.remove(task.id)
+        days[date]!!.remove(task.id)
+        ids.remove(task.id)
         return true
     }
 
@@ -126,22 +126,22 @@ object Schedule {
      * If the ScheduledTask is not found, null will be returned too.
      */
     fun getScheduledTask(taskId: String): ScheduledTask?{
-        if (!this.ids.contains(taskId)){
+        if (!ids.contains(taskId)){
             return null
         }
 
-        return this.ids[taskId]
+        return ids[taskId]
     }
 
     /**
      * Checks if a task does exist
      */
     fun doesScheduledTaskExist(taskId: String): Boolean{
-        return this.ids.contains(taskId)
+        return ids.contains(taskId)
     }
 
     /**
-     * Returns the scheduled Tasks of an abstract task.
+     * Returns the scheduled Tasks.csv of an abstract task.
      * Returns a Map of <ID, Date>
      */
     fun getScheduledTasksOf(abstractTaskId: String): Map<String, Date>{
@@ -163,8 +163,8 @@ object Schedule {
      * Returns the date of a scheduled task
      */
     fun getDateOfScheduledTask(scheduledTaskId: String): Date?{
-        for (date in this.days.keys){
-            if (this.days[date]!!.contains(scheduledTaskId)){
+        for (date in days.keys){
+            if (days[date]!!.contains(scheduledTaskId)){
                 return date
             }
         }
@@ -172,9 +172,9 @@ object Schedule {
     }
 
     /**
-     * Returns all ids of all the scheduled Tasks
+     * Returns all ids of all the scheduled Tasks.csv
      */
     fun getAllTasks(): Array<String>{
-        return this.ids.keys.toTypedArray()
+        return ids.keys.toTypedArray()
     }
 }

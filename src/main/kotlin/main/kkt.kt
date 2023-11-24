@@ -1,16 +1,16 @@
 package main
 
 
-import classes.data.Person
-import classes.enums.Fairness
-import classes.generate.Generator
-import classes.task.Task
-import classes.time.Date
-import classes.time.Time
-import classes.time.WorkDays
-import objects.People
-import objects.Schedule
-import objects.Tasks
+import scheduling.classes.data.Person
+import scheduling.classes.enums.Fairness
+import scheduling.classes.generate.Generator
+import scheduling.classes.task.Task
+import scheduling.classes.time.Date
+import scheduling.classes.time.Time
+import scheduling.classes.time.WorkDays
+import scheduling.objects.People
+import scheduling.objects.Schedule
+import scheduling.objects.Tasks
 
 fun main() {
    tryProgram()
@@ -18,7 +18,6 @@ fun main() {
 }
 
 fun tryProgram(){
-    //TODO Find the infinite loop
     People.addPerson(
         Person(
             "Fritz",
@@ -72,7 +71,8 @@ fun tryProgram(){
             arrayOf(),
             arrayOf(),
             Fairness.MEDIUM
-        ))
+        )
+    )
     Tasks.addTask(
         Task(
             "OtherTask",
