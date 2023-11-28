@@ -1,6 +1,6 @@
 package scheduling.classes.generate
 
-import scheduling.classes.exceptions.NoPersonAvailable
+import exceptions.NoPersonAvailable
 import scheduling.classes.data.Limit
 import scheduling.classes.enums.Fairness
 import scheduling.classes.task.PersonList
