@@ -28,7 +28,7 @@ class Person: Comparable<Person>{
     var timePercentage: Double = -1.0       // Saves the relative amount of time the person is present
 
     public constructor(
-        firstame: String,
+        firstname: String,
         lastname: String,
         dateOfBirth: Date,
         nation: String,
