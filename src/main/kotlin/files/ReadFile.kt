@@ -10,7 +10,7 @@ abstract class ReadFile(path: String) {
     /**
      * Reads the file line by line, splits it and let's it's content to be processed
      */
-    protected fun readFile(){
+    fun readFile(){
         val reader = file.bufferedReader()
         var line = reader.readLine()
         val separator = this.getFileSeparator(line)

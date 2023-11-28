@@ -13,7 +13,10 @@ import scheduling.objects.Schedule
 import scheduling.objects.Tasks
 
 fun main() {
-   tryProgram()
+   val day = mutableListOf(Time("07:00"), Time("14:00"), Time("08:00"))
+   println(day)
+    println(day.sort())
+    println(day)
 
 }
 

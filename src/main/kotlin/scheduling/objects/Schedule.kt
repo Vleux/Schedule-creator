@@ -85,6 +85,13 @@ object Schedule {
     }
 
     /**
+     * Returns all existing days
+     */
+    fun getAllDays(): MutableMap<Date, ArrayList<String>>{
+        return this.days
+    }
+
+    /**
      * Adds a Scheduled Task to a certain day. The Date is used to specify the date
      * If the date does not exist, it will be created
      * @return false if the id is already used
