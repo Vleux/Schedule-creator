@@ -15,6 +15,12 @@ import scheduling.objects.People
 import scheduling.objects.Schedule
 import scheduling.objects.Tasks
 
+/**
+ * NOTIZEN
+ * - nachdem die Tasks alle mit Personen verbunden wurden nocheinmal sicherstellen
+ *  dass es fair ist (ein kontroll durchlauf auf den aufgaben)
+ *      -> Wenn etwas nicht gerecht ist, änderungen durchführen!
+ */
 fun main() {
     tryFiles()
 
@@ -29,6 +35,7 @@ fun tryFiles(){
     taskReader.readFile()
     println("Done.")
     println("""
+        
         
         -----------------------
         PRINTING THE READ TASKS
@@ -92,17 +99,6 @@ fun tryFiles(){
 
     val save = WriteSchedule("/home/manvel/Dateien/Downloads/Schedule.csv")
     save.writeFile()
-
-    for (personId in People.getAllPeopleIDs()){
-        val person = People.getPersonById(personId)!!
-        println("""
-            ------------------------------
-            
-            Name:       ${person.firstname}
-            ID:         ${person.id}
-            GenTasks:   ${person.myTasks}
-        """.trimIndent())
-    }
 
 }
 

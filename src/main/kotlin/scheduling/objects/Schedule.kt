@@ -156,7 +156,7 @@ object Schedule {
 
         val result = mutableMapOf<String, Date>()
         for (day in days){
-            println(day)
+
             for (id in day.value){
                 if (parentTask.isChild(id)){
                     result[id] = day.key

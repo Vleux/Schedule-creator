@@ -104,9 +104,6 @@ class PersonList {
      * Returns all the Available People for a specified time.
      */
     private fun getAvailablePeople(date: Date, begin: Time, end: Time): Array<String>{
-        println("-----------------")
-        println("date:      $date")
-        println("time:      $begin to $end")
         val people = getAvailablePeople(date).toMutableMap()
 
         for (entry in people.toMap()) {
@@ -117,7 +114,6 @@ class PersonList {
                 val person = People.getPersonById(entry.key)!!
                 if (person.visit.timeOfLeave < end){
                     people.remove(entry.key)
-                    println("removed:       ${person.id}")
                 }
 
             }else if (entry.value == Availability.ARRIVAL){
@@ -126,12 +122,9 @@ class PersonList {
                 val person = People.getPersonById(entry.key)!!
                 if (person.visit.timeOfArrival > begin){
                     people.remove(entry.key)
-                    println("removed:       ${person.id}")
                 }
             }
         }
-        println("Result:    ${people.keys.toList()}")
-        println("-----------------")
         return people.keys.toTypedArray()
     }
 
@@ -193,8 +186,6 @@ class PersonList {
 
         if (counter < amount) throw kotlin.Exception("Not enough people. The program has probably screwed up.")
 
-        println("finPeople That should always stay: $finPeople")
-
         counter = 0
 
         var resultSize = result.size
@@ -204,12 +195,9 @@ class PersonList {
             // gets the smallest number of chores
             val smallestCount: Int = finPeople.keys.min()
             val arr = finPeople[smallestCount]!!.toTypedArray()
-            println(arr.toList())
-            println("Av People:         $finPeople")
 
             for (personId in arr){
                 val person = People.getPersonById(personId)!!
-                println("Person:            $personId")
 
 
                 /* Ensure that the data is valid & people aren't overwhelmed */
@@ -236,9 +224,7 @@ class PersonList {
                 if (nationAchieved[person.nationality]!! < nationTarget[person.nationality]!!.roundToInt()){
                     result.add(personId)
                     resultSize++
-                    println()
 
-                    println("Fin People previously:     $finPeople")
                     when (fairness){
                         Fairness.MAXIMUM -> this.getCounts(personId).maximalFairnessTasks++
                         Fairness.MEDIUM -> this.getCounts(personId).mediumFairnessTasks++
@@ -255,8 +241,6 @@ class PersonList {
                     }else{
                         finPeople[smallestCount + 1]!!.add(personId)
                     }
-                    println("finPeople afterwards:      $finPeople")
-                    println()
                 }
                 if (amount <= resultSize) break
             }

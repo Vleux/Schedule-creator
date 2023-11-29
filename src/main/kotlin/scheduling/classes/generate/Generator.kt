@@ -29,42 +29,19 @@ class Generator {
     fun start(){
         // calculations previous to generatino
         this.calculateLimits()
-        println(
-            """
-                GenLimit:   ${this.limits.getGeneralLimit()}
-                MaxLimit:   ${this.limits.getMaximalFairnessLimit()}
-                MedLimit:   ${this.limits.getMediumFairnessLimit()}
-                LowLimit:   ${this.limits.getLowFairnessLimit()}
-            """.trimIndent()
-        )
         this.peopleAvailable.boot()
         this.sortTasks()
+
 
         // Generation
         this.scheduleTask(Fairness.MAXIMUM)
         this.checkCompleteSatisfiedTasks()
-        println("NEXT FAIRNESS")
 
         this.scheduleTask(Fairness.MEDIUM)
         this.checkCompleteSatisfiedTasks()
 
         this.scheduleTask(Fairness.LOW)
         this.checkCompleteSatisfiedTasks()
-
-        for (personId in People.getAllPeopleIDs()){
-            val person = People.getPersonById(personId)!!
-            println("""
-            ------------------------------
-            
-            Name:       ${person.firstname}
-            ID:         ${person.id}
-            GenTasks:   ${this.peopleAvailable.getCounts(personId).generalTasks}
-            MaxFair:    ${this.peopleAvailable.getCounts(personId).maximalFairnessTasks}
-            MedFair:    ${this.peopleAvailable.getCounts(personId).mediumFairnessTasks}
-            LowFair:    ${this.peopleAvailable.getCounts(personId).lowFairnessTasks}
-        """.trimIndent())
-        }
-
     }
 
 
@@ -272,10 +249,9 @@ class Generator {
     }
 
     /**
-     * Sorts the Tasks.csv that require the maximal fairness.
+     * Sorts the Tasks
      * Ensures that incompatible tasks & parallel tasks are avoided.
      */
-
     private fun scheduleTask(fairness: Fairness){
 
         // initialize values with right fairness
@@ -303,33 +279,13 @@ class Generator {
 
             for (taskId in tasks){
 
-                println("""
-                    
-                    #####################
-                    ---------------------
-                    #####################
-                    $taskId - ${Tasks.getTask(taskId)?.name}
-                    #####################
-                    ---------------------
-                    #####################
-                    
-                """.trimIndent())
-
                 // schedule the abstract task & get those tasks
                 val absTask = Tasks.getTask(taskId)!!
                 absTask.schedule()
                 val scheduledTasks = Schedule.getScheduledTasksOf(absTask.id)
 
                 //iterate over the scheduledTasks
-                for (entry in scheduledTasks){
-
-                    println("""
-                        ############
-                        ${entry.key} - ${Schedule.getDateOfScheduledTask(entry.key)}
-                        ############
-                    """.trimIndent())
-
-                    val date = entry.value
+                for (entry in scheduledTasks){                    val date = entry.value
                     val schedTask = Schedule.getScheduledTask(entry.key)!!
 
                     // get available people
@@ -357,206 +313,6 @@ class Generator {
                         ratio,
                         this.limits
                     ) ?: throw NoPersonAvailable("Something went wrong while searching for available persons. Please fix")
-                    for (person in people){
-                        schedTask.addPerson(person)
-                    }
-                }
-            }
-        }
-    }
-    private fun scheduleMaximalFairnessTasks(){
-        // starting with the tasks that exclude the most other tasks
-        val keys = this.maximalFairnessTasks.keys.sorted().reversed()
-
-        for (key in keys){
-            val tasks = this.maximalFairnessTasks[key]!!
-
-            for (taskId in tasks){
-                // create the scheduled Tasks.csv
-                val absTask = Tasks.getTask(taskId)!!
-                absTask.schedule()
-
-                // get the id's of incompatible scheduled tasks
-                val cache: MutableList<String> = mutableListOf()
-                val incompatAbsTasks = absTask.excludedBy
-
-                for (task in incompatAbsTasks){
-                    cache.addAll(
-                        Tasks.getTask(task)!!.children.toList()
-                    )
-                }
-
-                val incompatibleScheduledTasks = cache.toTypedArray()
-
-
-                // get the absolut ratio for every nation
-                val dates = Schedule.getScheduledTasksOf(absTask.id)
-
-                for (entry in dates){
-                    val date = entry.value
-                    val schedTask = Schedule.getScheduledTask(entry.key)!!
-                    // get available people
-                    val avPeople = this.peopleAvailable.getAvailablePeople(date)
-                    if (avPeople.size == 0){
-                        throw NoPersonAvailable("A task is scheduled on a date where no person is visiting.\nExiting program ...")
-                    }
-                    // Get the available people in reference to their Nations & calculate the ratio
-                    val avNations = this.peopleAvailable.getPeopleWithNations(avPeople.keys.toTypedArray())
-                    val ratio = mutableMapOf<String, Double>()
-                    for (nation in avNations){
-                        ratio[nation.key] = avPeople.size.toDouble() / nation.value.size.toDouble()
-                    }
-
-                    for (nation in ratio.keys){
-                        ratio[nation] = ratio[nation]!! * schedTask.peopleNeeded()
-                    }
-
-                    //Receive all People. Checking (incompatible tasks, amount of chores & co) is done in PersonLists
-                    val people = this.peopleAvailable.getPeopleWithMinimalTasks(
-                        date,
-                        schedTask.peopleNeeded(),
-                        Fairness.MAXIMUM,
-                        schedTask.id,
-                        ratio,
-                        this.limits
-                    ) ?: throw NoPersonAvailable("Something went wrong while searching for available persons. Please fix")
-
-                    for (person in people){
-                        schedTask.addPerson(person)
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * sorts the Tasks.csv that require a medium fairness
-     * Same structure as maximal fairness
-     */
-    private fun scheduleMediumFairnessTasks() {
-        // starting with the tasks that exclude the most other tasks
-        val keys = this.mediumFairnessTasks.keys.sorted().reversed()
-
-        for (key in keys){
-            val tasks = this.mediumFairnessTasks[key]!!
-
-            for (taskId in tasks){
-                // create the scheduled Tasks.csv
-                val absTask = Tasks.getTask(taskId)!!
-                absTask.schedule()
-
-                // get the id's of incompatible scheduled tasks
-                val cache: MutableList<String> = mutableListOf()
-                val incompatAbsTasks = absTask.excludedBy
-
-                for (task in incompatAbsTasks){
-                    cache.addAll(
-                        Tasks.getTask(task)!!.children.toList()
-                    )
-                }
-
-
-                // get the absolut ratio for every nation
-                val dates = Schedule.getScheduledTasksOf(absTask.id)
-
-                for (entry in dates){
-                    val date = entry.value
-                    val schedTask = Schedule.getScheduledTask(entry.key)!!
-                    // get available people
-                    val avPeople = this.peopleAvailable.getAvailablePeople(date)
-                    if (avPeople.isEmpty()){
-                        throw NoPersonAvailable("A task is scheduled on a date where no person is visiting.\nExiting program ...")
-                    }
-                    // Get the available people in reference to their Nations & calculate the ratio
-                    val avNations = this.peopleAvailable.getPeopleWithNations(avPeople.keys.toTypedArray())
-                    val ratio = mutableMapOf<String, Double>()
-                    for (nation in avNations){
-                        ratio[nation.key] = avPeople.size.toDouble() / nation.value.size.toDouble()
-                    }
-
-                    for (nation in ratio.keys){
-                        ratio[nation] = ratio[nation]!! * schedTask.peopleNeeded()
-                    }
-
-                    //Receive all People. Checking (incompatible tasks, amount of chores & co) is done in PersonLists
-                    val people = this.peopleAvailable.getPeopleWithMinimalTasks(
-                        date,
-                        schedTask.peopleNeeded(),
-                        Fairness.MEDIUM,
-                        schedTask.id,
-                        ratio,
-                        this .limits
-                    ) ?: throw NoPersonAvailable("Something went wrong while searching for available persons. Please fix")
-
-                    for (person in people){
-                        schedTask.addPerson(person)
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Sorts the Tasks.csv that require a low fairness
-     * Same structure as maximal fairness
-     */
-    private fun scheduleLowFairnessTasks() {
-        // starting with the tasks that exclude the most other tasks
-        val keys = this.lowFairnessTasks.keys.sorted().reversed()
-
-        for (key in keys){
-            val tasks = this.lowFairnessTasks[key]!!
-
-            for (taskId in tasks){
-                // create the scheduled Tasks.csv
-                val absTask = Tasks.getTask(taskId)!!
-                absTask.schedule()
-
-                // get the id's of incompatible scheduled tasks
-                val cache: MutableList<String> = mutableListOf()
-                val incompatAbsTasks = absTask.excludedBy
-
-                for (task in incompatAbsTasks){
-                    cache.addAll(
-                        Tasks.getTask(task)!!.children.toList()
-                    )
-                }
-
-
-                // get the absolut ratio for every nation
-                val dates = Schedule.getScheduledTasksOf(absTask.id)
-
-                for (entry in dates){
-
-                    val date = entry.value
-                    val schedTask = Schedule.getScheduledTask(entry.key)!!
-
-                    // get available people
-                    val avPeople = this.peopleAvailable.getAvailablePeople(date)
-                    if (avPeople.isEmpty()){
-                        throw NoPersonAvailable("A task is scheduled on a date where no person is visiting.\nExiting program ...")
-                    }
-                    // Get the available people in reference to their Nations & calculate the ratio
-                    val avNations = this.peopleAvailable.getPeopleWithNations(avPeople.keys.toTypedArray())
-                    val ratio = mutableMapOf<String, Double>()
-                    for (nation in avNations){
-                        ratio[nation.key] = avPeople.size.toDouble() / nation.value.size.toDouble()
-                    }
-
-                    for (nation in ratio.keys){
-                        ratio[nation] = ratio[nation]!! * schedTask.peopleNeeded()
-                    }
-
-                    //Receive all People. Checking (incompatible tasks, amount of chores & co) is done in PersonLists
-                    val people = this.peopleAvailable.getPeopleWithMinimalTasks(
-                        date,
-                        schedTask.peopleNeeded(),
-                        Fairness.LOW,
-                        schedTask.id,
-                        ratio,
-                        this.limits
-                    ) ?: throw NoPersonAvailable("Something went wrong while searching for available persons. Please fix")
-
                     for (person in people){
                         schedTask.addPerson(person)
                     }
