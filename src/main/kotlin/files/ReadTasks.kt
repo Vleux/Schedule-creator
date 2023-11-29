@@ -23,12 +23,15 @@ class ReadTasks(path: String): ReadFile(path) {
          */
         fun getDateTime():Array<Pair<Time, Time>> {
             val time = arrayListOf<Pair<Time, Time>>()
-            for (i in 5 until content.size) {
+            for (i in 6 until content.size) {
+                if (content[i] == ""){
+                    return time.toTypedArray()
+                }
                 val time1 = content[i].split("-")[0]
                 val time2 = content[i].split("-")[1]
                 time.add(Pair(Time(time1), Time(time2)))
             }
-            return time.toTypedArray<Pair<Time, Time>>()
+            return time.toTypedArray()
         }
 
         try{
@@ -40,7 +43,7 @@ class ReadTasks(path: String): ReadFile(path) {
                 val newTask =  Task(
                     content[0],
                     content[1].toInt(),
-                    mapOf(Pair(Date(content[3]), getDateTime())),
+                    mapOf(Pair(Date(content[5]), getDateTime())),
                     emptyArray(),
                     emptyArray(),
                     when (content[3].lowercase()) {
@@ -69,11 +72,12 @@ class ReadTasks(path: String): ReadFile(path) {
                     taskExcludes[newTask.id]!!.addAll(content[2].split("&").toCollection(ArrayList()))
                 }
 
+
                 // save the task in the Tasks object
                 scheduling.objects.Tasks.addTask(newTask)
 
             }else{
-                // In this case, the given date-time data belongs to the previous task, due to the name not existing Name!
+                                // In this case, the given date-time data belongs to the previous task, due to the name not existing Name!
                 val newDateTime = Tasks.getTask(this.previousTask)!!.dateTime.toMutableMap()
                 newDateTime[Date(content[5])] = getDateTime()
                 Tasks.getTask(this.previousTask)!!.dateTime = newDateTime.toMap()
@@ -92,11 +96,15 @@ class ReadTasks(path: String): ReadFile(path) {
      */
     override fun cleanUp(){
         // Save the excluded Tasks as excluded Tasks in the specified Task
+
         for (entry in taskExcludes){
             val task = Tasks.getTask(
-                mapNamesToId[entry.key]!!
+                entry.key
             )!!
             for (taskName in entry.value){
+                if (taskName == ""){
+                    continue
+                }
                 task.addExcludedTask(
                     mapNamesToId[taskName]!!
                 )

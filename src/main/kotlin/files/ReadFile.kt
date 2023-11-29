@@ -27,7 +27,7 @@ abstract class ReadFile(path: String) {
     }
 
     /**
-     * Receives every line splitted into a List
+     * Receives every line split into a List
      */
     protected abstract fun processData(content: List<String>): Boolean
 

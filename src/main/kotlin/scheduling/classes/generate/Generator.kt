@@ -31,27 +31,40 @@ class Generator {
         this.calculateLimits()
         println(
             """
-                ${this.limits.getGeneralLimit()}
-                ${this.limits.getMaximalFairnessLimit()}
-                ${this.limits.getMediumFairnessLimit()}
+                GenLimit:   ${this.limits.getGeneralLimit()}
+                MaxLimit:   ${this.limits.getMaximalFairnessLimit()}
+                MedLimit:   ${this.limits.getMediumFairnessLimit()}
+                LowLimit:   ${this.limits.getLowFairnessLimit()}
             """.trimIndent()
         )
         this.peopleAvailable.boot()
         this.sortTasks()
-        println("Limits calculated")
 
         // Generation
-        this.scheduleMaximalFairnessTasks()
+        this.scheduleTask(Fairness.MAXIMUM)
         this.checkCompleteSatisfiedTasks()
-        println("maxFairness calculated")
+        println("NEXT FAIRNESS")
 
-        this.scheduleMediumFairnessTasks()
+        this.scheduleTask(Fairness.MEDIUM)
         this.checkCompleteSatisfiedTasks()
-        println("medFairness calculated")
 
-        this.scheduleLowFairnessTasks()
+        this.scheduleTask(Fairness.LOW)
         this.checkCompleteSatisfiedTasks()
-        println("lowFairness calculated")
+
+        for (personId in People.getAllPeopleIDs()){
+            val person = People.getPersonById(personId)!!
+            println("""
+            ------------------------------
+            
+            Name:       ${person.firstname}
+            ID:         ${person.id}
+            GenTasks:   ${this.peopleAvailable.getCounts(personId).generalTasks}
+            MaxFair:    ${this.peopleAvailable.getCounts(personId).maximalFairnessTasks}
+            MedFair:    ${this.peopleAvailable.getCounts(personId).mediumFairnessTasks}
+            LowFair:    ${this.peopleAvailable.getCounts(personId).lowFairnessTasks}
+        """.trimIndent())
+        }
+
     }
 
 
@@ -59,9 +72,6 @@ class Generator {
      * Calculates the Limits while ensuring that the Limits are not too low
      */
     private fun calculateLimits(){
-        println()
-        println("-#-#-#-#-#-#-#-#-#-#-#-#")
-        println()
         // Calculate the Amount of Tasks.csv (appearance of a Task * needed People)
         var allTaskCount = 0
         var maxFairnessTaskCount = 0
@@ -103,8 +113,6 @@ class Generator {
         var maxFairLimit = (maxFairnessTaskCount).toDouble() / (amountOfPeople).toDouble()
         var medFairLimit: Double = (medFairnessTaskCount).toDouble() / (amountOfPeople).toDouble()
         var lowFairLimit = (lowFairnessTaskCount).toDouble() / (amountOfPeople).toDouble()
-        println(medFairLimit)
-        println(genLimit - maxFairLimit - medFairLimit)
 
         // Checks that the Limit is not too small - if it is it will be increased
         while (genLimit * amountOfPeople < allTaskCount){genLimit++}
@@ -132,9 +140,6 @@ class Generator {
             medFairLimit.toInt(),
             lowFairLimit.toInt()
         )
-        println()
-        println("####")
-        println()
     }
 
     /**
@@ -144,7 +149,7 @@ class Generator {
      * saves the relative working-time in the People
      */
     private fun getAmountOfPeople(): Int{
-        // Get the first arrival and the last leave of a person the "maxDays"
+        // Get the first arrival, and the last leave of a person; the "maxDays"
         // Could also be done with the tasks - but people are more important!
 
         val ids = People.getAllPeopleIDs()
@@ -172,13 +177,14 @@ class Generator {
         for (id in ids){
             val person = People.getPersonById(id)!!
             var amountOfDays = person.visit.getWorkDays().size.toDouble()
+
             if (person.visit.timeOfArrival > Time("12:00")){
                 amountOfDays -= 0.5
             }
             if (person.visit.timeOfLeave < Time("14:00")){
                 amountOfDays -= 0.5
             }
-            person.timePercentage = maxTime / amountOfDays
+            person.timePercentage = amountOfDays / maxTime
             people += person.timePercentage
         }
 
@@ -269,6 +275,95 @@ class Generator {
      * Sorts the Tasks.csv that require the maximal fairness.
      * Ensures that incompatible tasks & parallel tasks are avoided.
      */
+
+    private fun scheduleTask(fairness: Fairness){
+
+        // initialize values with right fairness
+        var taskMap: Map<Int, Array<String>> = emptyMap()
+        var keys = listOf<Int>()
+
+        when (fairness){
+            Fairness.MAXIMUM    -> {
+                keys = this.maximalFairnessTasks.keys.sorted().reversed()
+                taskMap = this.maximalFairnessTasks
+            }
+            Fairness.MEDIUM     -> {
+                keys = this.mediumFairnessTasks.keys.sorted().reversed()
+                taskMap = this.mediumFairnessTasks
+            }
+            Fairness.LOW        -> {
+                keys = this.lowFairnessTasks.keys.sorted().reversed()
+                taskMap = this.lowFairnessTasks
+            }
+        }
+
+        // start with the tasks that exclude the most others
+        for (key in keys){
+            val tasks = taskMap[key]!!
+
+            for (taskId in tasks){
+
+                println("""
+                    
+                    #####################
+                    ---------------------
+                    #####################
+                    $taskId - ${Tasks.getTask(taskId)?.name}
+                    #####################
+                    ---------------------
+                    #####################
+                    
+                """.trimIndent())
+
+                // schedule the abstract task & get those tasks
+                val absTask = Tasks.getTask(taskId)!!
+                absTask.schedule()
+                val scheduledTasks = Schedule.getScheduledTasksOf(absTask.id)
+
+                //iterate over the scheduledTasks
+                for (entry in scheduledTasks){
+
+                    println("""
+                        ############
+                        ${entry.key} - ${Schedule.getDateOfScheduledTask(entry.key)}
+                        ############
+                    """.trimIndent())
+
+                    val date = entry.value
+                    val schedTask = Schedule.getScheduledTask(entry.key)!!
+
+                    // get available people
+                    val avPeople = this.peopleAvailable.getAvailablePeople(date)
+
+                    if (avPeople.isEmpty()) throw NoPersonAvailable("A task is scheduled on a date where no person is visiting.\nExiting program ...")
+
+                    // Get the available people in reference to their Nations & calculate the ratio
+                    val avNations = this.peopleAvailable.getPeopleWithNations(avPeople.keys.toTypedArray())
+                    val ratio = mutableMapOf<String, Double>()
+                    for (nation in avNations){
+                        ratio[nation.key] =  nation.value.size.toDouble() / avPeople.size.toDouble()
+                    }
+
+                    for (nation in ratio.keys){
+                        ratio[nation] = ratio[nation]!! * schedTask.peopleNeeded()
+                    }
+
+                    //Receive all People. Checking (incompatible tasks, amount of chores & co) is done in PersonLists
+                    val people = this.peopleAvailable.getPeopleWithMinimalTasks(
+                        date,
+                        schedTask.peopleNeeded(),
+                        fairness,
+                        schedTask.id,
+                        ratio,
+                        this.limits
+                    ) ?: throw NoPersonAvailable("Something went wrong while searching for available persons. Please fix")
+                    for (person in people){
+                        schedTask.addPerson(person)
+                    }
+                }
+            }
+        }
+    }
     private fun scheduleMaximalFairnessTasks(){
         // starting with the tasks that exclude the most other tasks
         val keys = this.maximalFairnessTasks.keys.sorted().reversed()

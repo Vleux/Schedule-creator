@@ -64,7 +64,7 @@ class WriteSchedule(path: String): WriteFile(path) {
             }
 
             this.writeLine(firstLine, ";")
-            this.writeLine(firstLine, ";")
+            this.writeLine(secondLine, ";")
         }
     }
 

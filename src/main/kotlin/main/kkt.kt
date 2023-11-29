@@ -1,6 +1,9 @@
 package main
 
 
+import files.ReadParticipants
+import files.ReadTasks
+import files.WriteSchedule
 import scheduling.classes.data.Person
 import scheduling.classes.enums.Fairness
 import scheduling.classes.generate.Generator
@@ -13,10 +16,93 @@ import scheduling.objects.Schedule
 import scheduling.objects.Tasks
 
 fun main() {
-   val day = mutableListOf(Time("07:00"), Time("14:00"), Time("08:00"))
-   println(day)
-    println(day.sort())
-    println(day)
+    tryFiles()
+
+    println("printing")
+    printSchedule()
+}
+
+fun tryFiles(){
+    val taskReader = ReadTasks("/home/manvel/Dateien/Downloads/tasks.csv")
+    val peopleReader = ReadParticipants("/home/manvel/Dateien/Downloads/participants.csv")
+    println("reading tasks ...")
+    taskReader.readFile()
+    println("Done.")
+    println("""
+        
+        -----------------------
+        PRINTING THE READ TASKS
+        -----------------------
+                
+    """.trimIndent())
+    val allTasks = Tasks.getAllTasks()
+    for (task in allTasks){
+        println(
+            """
+                #################################
+                
+                Name:       ${task.name}
+                ID:         ${task.id}
+                People:     ${task.numberOfPeople}
+                Datum&Zeit  ${task.dateTime.toList()}
+                Excludes    ${task.excludesTasks.toList()}
+                Fairness    ${task.requiredFairness}
+                
+            """.trimIndent()
+        )
+    }
+    println("Reading Participants ...")
+    peopleReader.readFile()
+    println("Done ...")
+
+    println("""
+        
+        ######################################
+        PRINTING ALL THE RECEIVED PARTICIPANTS
+        ######################################
+        
+    """.trimIndent())
+
+    val allPart = People.getAllPeopleIDs()
+
+    for (id in allPart){
+        val pers = People.getPersonById(id)!!
+        println("""
+            
+            -------------------------------
+            
+            ID          ${pers.id}
+            Vorname     ${pers.firstname}
+            Nachname    ${pers.lastname}
+            Nation      ${pers.nationality}
+        """.trimIndent())
+    }
+
+    println("""
+        
+        -------------------------------
+        
+    """.trimIndent())
+
+    val gen = Generator()
+    println("Generating ...")
+    gen.start()
+
+    println("Done.")
+
+    val save = WriteSchedule("/home/manvel/Dateien/Downloads/Schedule.csv")
+    save.writeFile()
+
+    for (personId in People.getAllPeopleIDs()){
+        val person = People.getPersonById(personId)!!
+        println("""
+            ------------------------------
+            
+            Name:       ${person.firstname}
+            ID:         ${person.id}
+            GenTasks:   ${person.myTasks}
+        """.trimIndent())
+    }
 
 }
 
@@ -144,6 +230,10 @@ fun tryProgram(){
 
     println("Generated")
 
+    printSchedule()
+}
+
+fun printSchedule(){
     val schedTasks = Schedule.getAllTasks()
 
     for (id in schedTasks){
@@ -157,6 +247,7 @@ fun tryProgram(){
                 --------------------------------------------
                 
                 ID:     ${id}
+                Task:   ${Tasks.getTask(task.parentTask)!!.name}
                 DATE:   ${Schedule.getDateOfScheduledTask(id)}
                 TIME:   ${task.time}
                 PERSONS:${persons}

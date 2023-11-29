@@ -77,18 +77,23 @@ class PersonList {
     }
 
     /**
-     * Gets every person, that is available the whole day, leaves after 13:00 o'clock and arrives before 13:00 o'clock
+     * Gets every person, that is available the whole day, is leaving or will arrive
      */
     fun getAvailablePeople(date: Date): Map<String, Availability>{
         val availablePersons = mutableMapOf<String, Availability>()
-        for (personId in this.person){
-            val pers = People.getPersonById(personId)
 
-            if (pers!!.visit.getFirstDay() == date && pers.visit.timeOfArrival <= Time("13:00")){
+        for (personId in this.person){
+            val visit = People.getPersonById(personId)!!.visit
+            val firstDay = visit.getFirstDay()
+            val lastDay = visit.getLastDay()
+
+            if (firstDay == date){          // Arriving
                 availablePersons[personId] = Availability.ARRIVAL
-            }else if (pers.visit.getLastDay() == date && pers.visit.timeOfLeave >= Time("13:00")){
+
+            }else if (lastDay == date){     // Leaving
                 availablePersons[personId] = Availability.LEAVE
-            }else{
+
+            }else if (firstDay < date && lastDay > date){   //Available
                 availablePersons[personId] = Availability.ALL_DAY
             }
         }
@@ -98,41 +103,46 @@ class PersonList {
     /**
      * Returns all the Available People for a specified time.
      */
-    fun getAvailablePeople(date: Date, begin: Time, end: Time): Array<String>{
+    private fun getAvailablePeople(date: Date, begin: Time, end: Time): Array<String>{
+        println("-----------------")
+        println("date:      $date")
+        println("time:      $begin to $end")
         val people = getAvailablePeople(date).toMutableMap()
-        for (entry in people) {
+
+        for (entry in people.toMap()) {
+
+            // If a person leaves before the task ends, the person will be removed
             if (entry.value == Availability.LEAVE){
+
                 val person = People.getPersonById(entry.key)!!
                 if (person.visit.timeOfLeave < end){
                     people.remove(entry.key)
-                }else if (person.visit.timeOfArrival > begin){
+                    println("removed:       ${person.id}")
+                }
+
+            }else if (entry.value == Availability.ARRIVAL){
+                //If a person arrives after the task begins, the person will be removed
+
+                val person = People.getPersonById(entry.key)!!
+                if (person.visit.timeOfArrival > begin){
                     people.remove(entry.key)
+                    println("removed:       ${person.id}")
                 }
             }
         }
+        println("Result:    ${people.keys.toList()}")
+        println("-----------------")
         return people.keys.toTypedArray()
     }
 
-    /**
-     * Returns the people that are available during that time with the least tasks.
-     *
-     */
     fun getPeopleWithMinimalTasks(
         date: Date,
         amount: Int,
-        pTasks: Fairness,
+        fairness: Fairness,
         scheduledTaskId: String,
         nationTarget: MutableMap<String, Double>,
         limit: Limit
     ): Array<String>?{
-
-        println("""
-            #####################
-            #####################
-            #####################
-            ${Tasks.getTask(Schedule.getScheduledTask(scheduledTaskId)!!.parentTask)!!.name}
-        """.trimIndent())
-
         // some values for the function
         val schedTask = Schedule.getScheduledTask(scheduledTaskId) ?: return null
         val begin = schedTask.time.first
@@ -145,218 +155,115 @@ class PersonList {
 
 
         //checking that the amount of people fits the nationTarget
-        var cache: Double = 0.0
+        var cache = 0.0
         for (nation in nationTarget){
             cache += nation.value
         }
         if (cache.roundToInt() < amount){
-            return null
+            throw Exception("The nationTargets have serious problems")
         }
         // The different behaviour for different fairness-level. Could have written the Code in the other direction(when inside)
         // but in this way, the "when" is only executed once
-        when (pTasks){
-            Fairness.MAXIMUM -> {
-                // saves the people in relation to their amount of maximalFairnessTasks
-                for (personId in people){
 
-                    val tasks = this.getCounts(personId).maximalFairnessTasks
+        var counter = 0
+        // saves the people in relation to their amount of maximalFairnessTasks
+        for (personId in people){
 
-                    // Continues if there are parallel, excluded tasks within 24 hours
-                    if (!this.freeForTask(
-                            personId,
-                            scheduledTaskId,
-                            date,
-                        )) continue
+            val tasks = when(fairness){
+                Fairness.MAXIMUM -> this.getCounts(personId).maximalFairnessTasks
+                Fairness.MEDIUM -> this.getCounts(personId).mediumFairnessTasks
+                Fairness.LOW -> this.getCounts(personId).generalTasks
+            }
 
-                    // Saves the person with it's amount of task
-                    if (finPeople[tasks] == null){
-                        finPeople[tasks] = arrayListOf(personId)
+            // Continues if there are parallel, excluded tasks within 24 hours
+            if (!this.freeForTask(
+                    personId,
+                    scheduledTaskId,
+                    date,
+                )) continue
+
+            // Saves the person with it's amount of task
+            if (finPeople[tasks] == null){
+                finPeople[tasks] = arrayListOf(personId)
+            }else{
+                finPeople[tasks]!!.add(personId)
+            }
+            counter++
+        }
+
+        if (counter < amount) throw kotlin.Exception("Not enough people. The program has probably screwed up.")
+
+        println("finPeople That should always stay: $finPeople")
+
+        counter = 0
+
+        var resultSize = result.size
+        // gets the first people, that are free and have the lowest amout of maximal fairness tasks
+        while (resultSize < amount){
+
+            // gets the smallest number of chores
+            val smallestCount: Int = finPeople.keys.min()
+            val arr = finPeople[smallestCount]!!.toTypedArray()
+            println(arr.toList())
+            println("Av People:         $finPeople")
+
+            for (personId in arr){
+                val person = People.getPersonById(personId)!!
+                println("Person:            $personId")
+
+
+                /* Ensure that the data is valid & people aren't overwhelmed */
+                if (fairness == Fairness.MAXIMUM && getCounts(personId).maximalFairnessTasks == limit.getMaximalFairnessLimit()){
+                    println("Fatal error with limits going on")
+                    throw Error("")
+                }else if (fairness == Fairness.MEDIUM && getCounts(personId).mediumFairnessTasks == limit.getMediumFairnessLimit()){
+                    println("Fatal error with limits going on")
+                    throw Error("")
+                }else if (fairness == Fairness.LOW && getCounts(personId).generalTasks == limit.getGeneralLimit()){
+                    println("Fatal error with limits going on")
+                    throw Error("")
+                }
+
+                if (!nationTarget.keys.contains(person.nationality)) {
+                    println("wrong nation")
+                    continue
+                }
+                if (nationAchieved[person.nationality] == null){
+                    nationAchieved[person.nationality] = 0
+                }
+
+                // add person to the list and increase it's work-count if more people of his nationality are needed
+                if (nationAchieved[person.nationality]!! < nationTarget[person.nationality]!!.roundToInt()){
+                    result.add(personId)
+                    resultSize++
+                    println()
+
+                    println("Fin People previously:     $finPeople")
+                    when (fairness){
+                        Fairness.MAXIMUM -> this.getCounts(personId).maximalFairnessTasks++
+                        Fairness.MEDIUM -> this.getCounts(personId).mediumFairnessTasks++
+                        Fairness.LOW -> this.getCounts(personId).lowFairnessTasks++
+                    }
+
+                    finPeople[smallestCount]!!.remove(personId)
+                    if (finPeople[smallestCount]!!.isEmpty()){
+                        finPeople.remove(smallestCount)
+                    }
+
+                    if (finPeople[smallestCount + 1] == null){
+                        finPeople[smallestCount + 1] = arrayListOf(personId)
                     }else{
-                        finPeople[tasks]!!.add(personId)
+                        finPeople[smallestCount + 1]!!.add(personId)
                     }
+                    println("finPeople afterwards:      $finPeople")
+                    println()
                 }
-
-                var resultSize = result.size
-                // gets the first people, that are free and have the lowest amout of maximal fairness tasks
-                while (resultSize < amount){
-
-                    // gets the smallest amount of chores
-                    val smallestCount: Int = finPeople.keys.min()
-                    val arr = finPeople[smallestCount]!!.toTypedArray()
-
-                    for (personId in arr){
-                        val person = People.getPersonById(personId)!!
-
-                        // Ensure that the data is valid & people aren't overwhelmed
-                        if (getCounts(personId).maximalFairnessTasks == limit.getMaximalFairnessLimit()){
-                            println("Fatal error with limits going on")
-                            throw Error("")
-                        }
-                        if (!nationTarget.keys.contains(person.nationality)) {
-                            println("wrong nation")
-                            continue
-                        }
-                        if (nationAchieved[person.nationality] == null){
-                            nationAchieved[person.nationality] = 0
-                        }
-
-                        // add person to the list and increase it's work-count if more people of his nationality are needed
-                        if (nationAchieved[person.nationality]!! < nationTarget[person.nationality]!!.roundToInt()){
-                            result.add(personId)
-                            resultSize++
-
-                            this.getCounts(personId).maximalFairnessTasks++
-                            finPeople[smallestCount]!!.remove(personId)
-
-                            if (finPeople[smallestCount + 1] == null){
-                                finPeople[smallestCount + 1] = arrayListOf(personId)
-                            }else{
-                                finPeople[smallestCount + 1]!!.add(personId)
-                            }
-                        }
-                        if (amount <= resultSize) break
-                    }
-                }
+                if (amount <= resultSize) break
             }
-            Fairness.MEDIUM -> {
-                // saves the people in relation to their amount of maximalFairnessTasks
-                for (personId in people){
-                    val tasks = this.getCounts(personId).mediumFairnessTasks
-
-                    // Continues if there are parallel, excluded tasks within 24 hours
-                    if (!this.freeForTask(
-                            personId,
-                            scheduledTaskId,
-                            date,
-                        )){continue}
-
-                    // Saves the person with its amount of task
-                    if (finPeople[tasks] == null){
-                        finPeople[tasks] = arrayListOf(personId)
-                    }else{
-                        finPeople[tasks]!!.add(personId)
-                    }
-                }
-
-
-                var resultSize = result.size
-                // gets the first people, that are free and have the lowest amout of maximal fairness tasks
-                while (amount > resultSize){
-
-                    // gets the smallest amount of chores
-                    val smallestCount: Int = finPeople.keys.min()
-                    val arr = finPeople[smallestCount]!!.toTypedArray()
-
-                    for (personId in arr) {
-                        val person = People.getPersonById(personId)!!
-
-                        // Ensure that the data is valid & people aren't overwhelmed
-                        if (getCounts(personId).mediumFairnessTasks == limit.getMediumFairnessLimit()) {
-                            println("Fatal error with limits going on")
-                            throw Error("")
-                        }
-                        if (!nationTarget.keys.contains(person.nationality)) {
-                            println("wrong nation")
-                            continue
-                        }
-                        if (nationAchieved[person.nationality] == null) {
-                            nationAchieved[person.nationality] = 0
-                        }
-
-                        // add person to the list and increase it's work-count if more people of his nationality are needed
-                        if (nationAchieved[person.nationality]!! < nationTarget[person.nationality]!!.roundToInt()) {
-                            result.add(personId)
-                            resultSize++
-
-                            this.getCounts(personId).mediumFairnessTasks++
-                            finPeople[smallestCount]!!.remove(personId)
-
-                            if (finPeople[smallestCount + 1] == null) {
-                                finPeople[smallestCount + 1] = arrayListOf(personId)
-                            } else {
-                                finPeople[smallestCount + 1]!!.add(personId)
-                            }
-                        }
-                        if (amount <= resultSize) break
-                    }
-                }
-            }
-            Fairness.LOW -> {
-                // saves the people in relation to their amount of maximalFairnessTasks
-                for (personId in people) {
-                    val tasks = this.getCounts(personId).lowFairnessTasks
-
-                    // Continues if there are parallel, excluded tasks within 24 hours
-                    if (!this.freeForTask(
-                            personId,
-                            scheduledTaskId,
-                            date,
-                        )) continue
-
-
-                    // Saves the person with its amount of task
-                    if (finPeople[tasks] == null) {
-                        finPeople[tasks] = arrayListOf(personId)
-                    } else {
-                        finPeople[tasks]!!.add(personId)
-                    }
-                }
-
-                var resultSize = result.size
-                // gets the first people, that are free and have the lowest amout of maximal fairness tasks
-                while (amount > resultSize) {
-
-                    // gets the smallest number of chores
-                    val smallestCount: Int = finPeople.keys.min()
-                    val arr = finPeople[smallestCount]!!.toTypedArray()
-
-                    for (personId in arr) {
-                        val person = People.getPersonById(personId)!!
-
-                        // Ensure that the data is valid & people aren't overwhelmed
-                        if (getCounts(personId).lowFairnessTasks == limit.getLowFairnessLimit()) {
-                            println("Fatal error with limits going on")
-                            throw Error("")
-                        }
-                        if (!nationTarget.keys.contains(person.nationality)) {
-                            println("wrong nation")
-                            continue
-                        }
-                        if (nationAchieved[person.nationality] == null) {
-                            nationAchieved[person.nationality] = 0
-                        }
-
-                        println("""
-                            -------------------------
-                            
-                            Previous finPeople: $finPeople
-                        
-                        """.trimIndent())
-
-                        // add person to the list and increase it's work-count if more people of his nationality are needed
-                        if (nationAchieved[person.nationality]!! < nationTarget[person.nationality]!!.roundToInt()) {
-                            result.add(personId)
-                            resultSize++
-
-                            this.getCounts(personId).lowFairnessTasks++
-                            finPeople[smallestCount]!!.remove(personId)
-
-                            if (finPeople[smallestCount + 1] == null) {
-                                finPeople[smallestCount + 1] = arrayListOf(personId)
-                            } else {
-                                finPeople[smallestCount + 1]!!.add(personId)
-                            }
-                        }
-                        println("Afterwards finPeople: $finPeople")
-                        println()
-                        println("-------------------------")
-                        if (amount <= resultSize) break
-                    }
-                }
-            }
+            counter++
+            if (counter == 1000) throw Error("Infinite Loop detected")
         }
         return result.toTypedArray()
-
     }
 
     private fun freeForTask(personId: String, scheduledTId: String, date: Date): Boolean{
