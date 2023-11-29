@@ -18,8 +18,7 @@ class WriteSchedule(path: String): WriteFile(path) {
             this.days.sort()
 
             for (task in entry.value){
-                val scheduledTask = Schedule.getScheduledTask(task)!!
-                val time = scheduledTask.time.first
+                val time = Schedule.getScheduledTask(task)!!.time.first
 
                 if (dataTable[time] != null){
                     dataTable[time]!!.add(task)
@@ -50,11 +49,14 @@ class WriteSchedule(path: String): WriteFile(path) {
             for (task in this.dataTable[time]!!){
                 val i = this.days.indexOf(
                     Schedule.getDateOfScheduledTask(task).toString()
-                )
+                ) + 1
+
                 val scheduledTask = Schedule.getScheduledTask(task)!!
                 firstLine[i] = Tasks.getTask(
                     scheduledTask.parentTask
                 )!!.name
+                firstLine[0] = "${firstLine[0]} - ${scheduledTask.time.second}"
+
                 var people = ""
                 for (id in scheduledTask.takenPeople){
                     val person = People.getPersonById(id)!!
