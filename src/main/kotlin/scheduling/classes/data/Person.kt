@@ -27,7 +27,7 @@ class Person: Comparable<Person>{
     private var _myTasks: MutableMap<String, Date> = mutableMapOf()
     var timePercentage: Double = -1.0       // Saves the relative amount of time the person is present
 
-    public constructor(
+    constructor(
         firstname: String,
         lastname: String,
         dateOfBirth: Date,
@@ -52,21 +52,21 @@ class Person: Comparable<Person>{
         get() = this._id
     var firstname: String
         get() = this._firstname
-        set(name: String){
+        set(name){
             if (name.length > 0){
                 this._firstname = name
             }
         }
     var lastname: String
         get() = this._lastname
-        set(newLastname: String){
+        set(newLastname){
             if (lastname.length > 0){
                 this._lastname = newLastname
             }
         }
     var dateOfBirth: Date
         get() = this._dateOfBirth
-        set(newDate: Date){
+        set(newDate){
             val today = Date.toDate(LocalDate.now())
             if (newDate > today){
                 this._dateOfBirth = newDate

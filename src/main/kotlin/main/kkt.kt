@@ -1,6 +1,7 @@
 package main
 
 
+import files.ReadAssignedPeople
 import files.ReadParticipants
 import files.ReadTasks
 import files.WriteSchedule
@@ -23,9 +24,6 @@ import scheduling.objects.Tasks
  */
 fun main() {
     tryFiles()
-
-    println("printing")
-    printSchedule()
 }
 
 fun tryFiles(){
@@ -91,6 +89,16 @@ fun tryFiles(){
         
     """.trimIndent())
 
+    println("reading already defined people")
+    val read = ReadAssignedPeople("/home/manvel/Dateien/Downloads/rest.csv")
+    read.readFile()
+
+    println("##################")
+    println("printing the Schedule for the first time")
+    println("##################")
+
+    printSchedule()
+
     val gen = Generator()
     println("Generating ...")
     gen.start()
@@ -99,6 +107,9 @@ fun tryFiles(){
 
     val save = WriteSchedule("/home/manvel/Dateien/Downloads/Schedule.csv")
     save.writeFile()
+
+    println("-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#")
+    printSchedule()
 
 }
 
@@ -238,11 +249,11 @@ fun printSchedule(){
         for (personID in task.takenPeople){
             persons += "${People.getPersonById(personID)!!.firstname} : "
         }
-        print(
+        println(
             """
                 --------------------------------------------
                 
-                ID:     ${id}
+                ID:     $id
                 Task:   ${Tasks.getTask(task.parentTask)!!.name}
                 DATE:   ${Schedule.getDateOfScheduledTask(id)}
                 TIME:   ${task.time}

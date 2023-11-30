@@ -54,7 +54,7 @@ open class Dates(
         return cache.toTypedArray()
     }
 
-    // Ensuring, that the last and first Day are in the correct order
+    // Ensuring that the last and first Day are in the correct order
 
     protected open fun check(){
         if (firstDay > lastDay){

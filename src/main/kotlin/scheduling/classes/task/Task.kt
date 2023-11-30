@@ -4,6 +4,7 @@ import scheduling.classes.enums.Fairness
 import scheduling.classes.time.Date
 import scheduling.classes.time.Time
 import scheduling.objects.IdKeeper
+import scheduling.objects.People
 import scheduling.objects.Schedule
 import scheduling.objects.Tasks
 
@@ -27,7 +28,7 @@ class Task(
     private var _excludesTasks: Array<String> = incompatibleTasks
     private var _excludedBy: Array<String> = excludedBy
     private var _driver: Boolean = driver
-    private var _children: Array<String> = arrayOf()
+    private var _children: MutableList<String> = mutableListOf()
     // Constructors
 
     // Masks and getters
@@ -64,7 +65,7 @@ class Task(
     val id: String
         get() = this._id
     val children: Array<String>
-        get() = this._children
+        get() = this._children.toTypedArray()
 
     /**
      * Adds a task excluded by this Task.
@@ -123,20 +124,101 @@ class Task(
         }
     }
 
-    fun schedule(takenPeople: Array<String> = emptyArray()){
-        val sTasks: ArrayList<String> = arrayListOf()
-        for (date in this.dateTime){
-            for (time in date.value){
-                sTasks.add(
-                    Schedule.addScheduledTask(
-                    date.key,
-                    this.id,
-                    time,
-                    takenPeople,
-                ))
+    /**
+     * Schedules all tasks that are not already scheduled.
+     */
+    fun scheduleAll(){
+        if (children.isEmpty()){
+            // Scheduling every occurence due to the lack of any scheduled tasks
+            for (date in this.dateTime){
+                for (time in date.value){
+                    this._children.add(
+                        Schedule.addScheduledTask(
+                            date.key,
+                            this.id,
+                            time,
+                            emptyArray(),
+                        ))
+                }
+            }
+        }else{
+            // Gets the date and time of every already scheduled task
+            val dateTime = mutableMapOf<Date, ArrayList<Pair<Time, Time>>>()
+
+            for (task in this.children) {
+                val date = Schedule.getDateOfScheduledTask(task)!!
+                if (dateTime[date] != null) {
+                    dateTime[date]!!.add(Schedule.getScheduledTask(task)!!.time)
+                } else {
+                    dateTime[date] = arrayListOf(
+                        Schedule.getScheduledTask(task)!!.time
+                    )
+                }
+            }
+
+            for (date in this.dateTime){
+                for (time in date.value){
+                    // If a task already has the same date and time, it will not be scheduled twice
+                    if (dateTime[date.key] != null && dateTime[date.key]!!.contains(time)){
+                         continue
+                    }
+                    // scheduling it, if not
+                    this._children.add(
+                        Schedule.addScheduledTask(
+                            date.key,
+                            this.id,
+                            time,
+                            emptyArray()
+                        )
+                    )
+                }
+            }
+
+        }
+
+    }
+
+    /**
+     * Schedules a single task if it does not already exist.
+     * If it does exist, the people will be added
+     * returns false if the given data is invalid
+     */
+    fun schedule(date: Date, time: Pair<Time, Time>, takenPeople: Array<String> = emptyArray()): Boolean{
+
+        // Making sure that the data is valid
+        dateTime[date] ?: return false
+        if (!dateTime[date]!!.contains(time)) return false
+
+        // checking that the task is not already scheduled on that day
+        val schedTasks = Schedule.getDay(date)?.intersect(this.children.toSet())
+
+        if (schedTasks != null){
+
+            for (taskID in schedTasks){
+                if (time == Schedule.getScheduledTask(taskID)!!.time){
+                    val searchedScheduledTask = Schedule.getScheduledTask(taskID)!!
+
+                    // If it is, the people will be added and the method ends
+                    for (person in takenPeople){
+                        searchedScheduledTask.addPerson(person)
+                        People.getPersonById(person)!!.myTasks[taskID] = date
+                        return true
+                    }
+                }
             }
         }
-        this._children = sTasks.toTypedArray()
+
+
+        // In this case the task does not yet exists and will hereby be created
+        this._children.add(
+            Schedule.addScheduledTask(
+                date,
+                this.id,
+                time,
+                takenPeople
+            )
+        )
+        return true
     }
 
     fun isChild(childId: String): Boolean{

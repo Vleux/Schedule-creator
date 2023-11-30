@@ -30,7 +30,7 @@ abstract class WriteFile(path: String) {
     /**
      *
      */
-    protected fun writeLine(line: Array<String>, delimiter: String){
+    protected fun writeLine(line: Array<String>, delimiter: String = ";"){
         writer.write(line.joinToString(delimiter))
         writer.newLine()
     }

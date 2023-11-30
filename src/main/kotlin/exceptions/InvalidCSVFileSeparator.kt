@@ -1,3 +1,3 @@
 package exceptions
 
-class InvalidCSVFileSeparator(message: String): Exception(message) {}
+class InvalidCSVFileSeparator(message: String): Exception(message)

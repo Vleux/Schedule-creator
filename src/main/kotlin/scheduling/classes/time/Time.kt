@@ -32,6 +32,16 @@ class Time (
         }
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (other == null){
+            return false
+        }
+        if (other is Time){
+            return other.time == this.time
+        }
+        return false
+    }
+
     override fun toString(): String {
         return time.toString()
     }

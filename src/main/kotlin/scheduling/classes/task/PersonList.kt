@@ -59,7 +59,7 @@ class PersonList {
      * Returns the counter for a person.
      * Also used to change counters.
      */
-    fun getCounts(personId: String): TaskCount {
+    private fun getCounts(personId: String): TaskCount {
         return this.counts[
                 this.person.indexOf(personId)
         ]
@@ -128,14 +128,19 @@ class PersonList {
         return people.keys.toTypedArray()
     }
 
+    /**
+     * Receives the People in relation to their tasks at a certain day and time.
+     * If a person is already a part of that scheduledTask, he won't be added
+     */
     fun getPeopleWithMinimalTasks(
         date: Date,
-        amount: Int,
+        pAmount: Int,
         fairness: Fairness,
         scheduledTaskId: String,
         nationTarget: MutableMap<String, Double>,
         limit: Limit
     ): Array<String>?{
+        var amount = pAmount
         // some values for the function
         val schedTask = Schedule.getScheduledTask(scheduledTaskId) ?: return null
         val begin = schedTask.time.first
@@ -162,20 +167,25 @@ class PersonList {
         // saves the people in relation to their amount of maximalFairnessTasks
         for (personId in people){
 
+            if (schedTask.takenPeople.contains(personId)) {
+                amount--
+                continue
+            }
+
             val tasks = when(fairness){
                 Fairness.MAXIMUM -> this.getCounts(personId).maximalFairnessTasks
                 Fairness.MEDIUM -> this.getCounts(personId).mediumFairnessTasks
                 Fairness.LOW -> this.getCounts(personId).generalTasks
             }
 
-            // Continues if there are parallel, excluded tasks within 24 hours
+            // Continue if there are parallel tasks or excluded tasks within 24 hours
             if (!this.freeForTask(
                     personId,
                     scheduledTaskId,
                     date,
                 )) continue
 
-            // Saves the person with it's amount of task
+            // Saves the person with its number of tasks
             if (finPeople[tasks] == null){
                 finPeople[tasks] = arrayListOf(personId)
             }else{
@@ -188,12 +198,19 @@ class PersonList {
 
         counter = 0
 
-        var resultSize = result.size
-        // gets the first people, that are free and have the lowest amout of maximal fairness tasks
-        while (resultSize < amount){
+        var resultSize = 0
 
-            // gets the smallest number of chores
-            val smallestCount: Int = finPeople.keys.min()
+        // gets the smallest number of chores
+        var smallestCount = finPeople.keys.min()
+        // gets the first people, that are free and have the lowest number of maximal fairness tasks
+
+        while (resultSize < amount && smallestCount <= finPeople.keys.max()){
+
+            if (!finPeople.keys.contains(smallestCount)){
+                smallestCount++
+                continue
+            }
+
             val arr = finPeople[smallestCount]!!.toTypedArray()
 
             for (personId in arr){
@@ -246,6 +263,9 @@ class PersonList {
             }
             counter++
             if (counter == 1000) throw Error("Infinite Loop detected")
+
+            smallestCount++
+
         }
         return result.toTypedArray()
     }
@@ -285,7 +305,7 @@ class PersonList {
             }
         }
 
-        //Ensuring that there are no tasks in paralell
+        //Ensuring that there are no tasks in parallel
         for (entry in schedTasks){
             if (entry.value == date){
                 val time = Schedule.getScheduledTask(entry.key)!!.time

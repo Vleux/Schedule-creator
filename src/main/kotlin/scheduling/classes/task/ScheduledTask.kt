@@ -8,7 +8,7 @@ import scheduling.objects.Tasks
 /**
  * DO NOT USE THE OPTION TO GIVE THE ID YOURSELF IF POSSIBLE
  */
-class ScheduledTask public constructor(
+class ScheduledTask(
     var time: Pair<Time, Time>,
     parentTask: String,
     takenPeople: Array<String>

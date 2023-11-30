@@ -74,7 +74,7 @@ class ReadTasks(path: String): ReadFile(path) {
 
 
                 // save the task in the Tasks object
-                scheduling.objects.Tasks.addTask(newTask)
+                Tasks.addTask(newTask)
 
             }else{
                                 // In this case, the given date-time data belongs to the previous task, due to the name not existing Name!

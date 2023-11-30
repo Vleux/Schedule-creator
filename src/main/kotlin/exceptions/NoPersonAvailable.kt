@@ -1,4 +1,3 @@
 package exceptions
 
-class NoPersonAvailable(message: String): Exception(message) {
-}
+class NoPersonAvailable(message: String): Exception(message)

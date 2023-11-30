@@ -145,9 +145,9 @@ class Generator {
         this.maxTime = WorkDays(firstDay, Time("01:00"), lastDay, Time("23:00")).getWorkDays().size
 
         /*
-        Calculates the available Work time (the amount of people).
+        Calculates the available Work time (the number of people).
         If somebody is only there for 5 out of 10 days, they will be counted as 0.5 Persons to decrease the
-        amount of tasks he has to fulfill.
+        number of tasks he has to fulfill.
          */
         var people = 0.0
 
@@ -169,7 +169,7 @@ class Generator {
     }
 
     /**
-     * Sorts the abstract Tasks.csv into fairness categories and saves the amount of tasks they exclude
+     * Sorts the abstract Tasks.csv into fairness categories and saves the number of tasks they exclude
      */
     private fun sortTasks(){
         val tasks = Tasks.getAllTasks()
@@ -281,7 +281,7 @@ class Generator {
 
                 // schedule the abstract task & get those tasks
                 val absTask = Tasks.getTask(taskId)!!
-                absTask.schedule()
+                absTask.scheduleAll()
                 val scheduledTasks = Schedule.getScheduledTasksOf(absTask.id)
 
                 //iterate over the scheduledTasks
@@ -304,7 +304,7 @@ class Generator {
                         ratio[nation] = ratio[nation]!! * schedTask.peopleNeeded()
                     }
 
-                    //Receive all People. Checking (incompatible tasks, amount of chores & co) is done in PersonLists
+                    //Receive all People. Checking (incompatible tasks, number of chores & co) is done in PersonLists
                     val people = this.peopleAvailable.getPeopleWithMinimalTasks(
                         date,
                         schedTask.peopleNeeded(),
