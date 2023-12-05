@@ -22,7 +22,7 @@ class ReadAssignedPeople(path: String): ReadFile(path) {
             currTask != "" &&
             content.size >= 3
         ){
-            this.tasks[this.currTask]!![this.previousDate]!![content[1]] = content.subList(2,content.lastIndex)
+            this.tasks[this.currTask]!![this.previousDate]!![content[1]] = content.subList(2,content.size)
 
         }else if (
             currTask != "" &&
@@ -31,9 +31,9 @@ class ReadAssignedPeople(path: String): ReadFile(path) {
             content[1] != ""
         ){
             if (this.tasks[this.currTask]!![content[0]] != null){
-                this.tasks[this.currTask]!![content[0]]!![content[1]] = content.subList(2, content.lastIndex)
+                this.tasks[this.currTask]!![content[0]]!![content[1]] = content.subList(2, content.size)
             }else{
-                this.tasks[this.currTask]!![content[0]] = mutableMapOf(Pair(content[1], content.subList(2, content.lastIndex)))
+                this.tasks[this.currTask]!![content[0]] = mutableMapOf(Pair(content[1], content.subList(2, content.size)))
             }
             this.previousDate = content[0]
 
@@ -78,7 +78,7 @@ class ReadAssignedPeople(path: String): ReadFile(path) {
                 try{
                     day = Date(date.key)
                 }catch(e: Exception){
-                    println("Date ${date.value} is incompatible.")
+                    println("Date $date is incompatible.")
                     continue
                 }
                 parentTask.dateTime.get(day) ?: continue

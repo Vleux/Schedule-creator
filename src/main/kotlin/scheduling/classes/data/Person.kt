@@ -25,7 +25,9 @@ class Person: Comparable<Person>{
     private var _visit: WorkDays
     private var _freeFromDuty: Boolean
     private var _myTasks: MutableMap<String, Date> = mutableMapOf()
+
     var timePercentage: Double = -1.0       // Saves the relative amount of time the person is present
+    var incompatibleTasks: MutableList<String>
 
     constructor(
         firstname: String,
@@ -34,6 +36,7 @@ class Person: Comparable<Person>{
         nation: String,
         drivingLicense: Boolean,
         visit: WorkDays,
+        incompatibleTasks: MutableList<String>,
         freeFromDuty: Boolean = false
     ){
 
@@ -43,6 +46,7 @@ class Person: Comparable<Person>{
         this._nationality = nation
         this._drivingLicense = drivingLicense
         this._visit = visit
+        this.incompatibleTasks = incompatibleTasks.toMutableList()
         this._freeFromDuty = freeFromDuty
     }
 

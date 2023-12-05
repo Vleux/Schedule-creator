@@ -140,7 +140,9 @@ class PersonList {
         nationTarget: MutableMap<String, Double>,
         limit: Limit
     ): Array<String>?{
+
         var amount = pAmount
+
         // some values for the function
         val schedTask = Schedule.getScheduledTask(scheduledTaskId) ?: return null
         val begin = schedTask.time.first
@@ -152,16 +154,45 @@ class PersonList {
         val result = mutableListOf<String>()
 
 
-        //checking that the amount of people fits the nationTarget
-        var cache = 0.0
-        for (nation in nationTarget){
-            cache += nation.value
-        }
-        if (cache.roundToInt() < amount){
+        // evaluate NationTarget
+        val numberFromNation = mutableMapOf<String, Int>()
+
+        // ensure that it is not too small from the beginning
+        if (nationTarget.values.sum().roundToInt() < amount){
             throw Exception("The nationTargets have serious problems")
         }
-        // The different behaviour for different fairness-level. Could have written the Code in the other direction(when inside)
-        // but in this way, the "when" is only executed once
+
+        // round the doubles
+        for (entry in nationTarget){
+            numberFromNation[entry.key] = (entry.value).roundToInt()
+        }
+
+
+        // Check that numberFromNation is valid
+        var sum = numberFromNation.values.sum()
+        var cache = 0
+
+        while (sum < amount){
+            val min = numberFromNation.values.min()
+            for (entry in numberFromNation){
+                if (numberFromNation[entry.key] == min){
+                    numberFromNation[entry.key] = numberFromNation[entry.key]!! + 1
+                    break
+                }
+            }
+            sum = numberFromNation.values.sum()
+            cache++
+            if (cache == 50) throw Exception("Problem with ratios")
+        }
+
+        // Allowing every nation if it is a task for only one single person
+        if (amount == 1){
+            for (key in numberFromNation.keys){
+                numberFromNation[key] = 1
+            }
+        }
+
+        // Now continue to search for the right people
 
         var counter = 0
         // saves the people in relation to their amount of maximalFairnessTasks
@@ -183,7 +214,10 @@ class PersonList {
                     personId,
                     scheduledTaskId,
                     date,
-                )) continue
+                )) {
+                println("Person $personId is not free")
+                continue
+            }
 
             // Saves the person with its number of tasks
             if (finPeople[tasks] == null){
@@ -194,10 +228,13 @@ class PersonList {
             counter++
         }
 
-        if (counter < amount) throw kotlin.Exception("Not enough people. The program has probably screwed up.")
+        if (counter < amount) {
+            println("PeopleNeeded: $amount")
+            println("PeopleAvailable: $counter")
+            throw kotlin.Exception("Not enough people. The program has probably screwed up.")
+        }
 
         counter = 0
-
         var resultSize = 0
 
         // gets the smallest number of chores
@@ -215,6 +252,7 @@ class PersonList {
 
             for (personId in arr){
                 val person = People.getPersonById(personId)!!
+                if (person.freeFromDuty) continue
 
 
                 /* Ensure that the data is valid & people aren't overwhelmed */
@@ -229,7 +267,7 @@ class PersonList {
                     throw Error("")
                 }
 
-                if (!nationTarget.keys.contains(person.nationality)) {
+                if (!numberFromNation.keys.contains(person.nationality)) {
                     println("wrong nation")
                     continue
                 }
@@ -238,7 +276,8 @@ class PersonList {
                 }
 
                 // add person to the list and increase it's work-count if more people of his nationality are needed
-                if (nationAchieved[person.nationality]!! < nationTarget[person.nationality]!!.roundToInt()){
+                if (nationAchieved[person.nationality]!! < numberFromNation[person.nationality]!!){
+                    nationAchieved[person.nationality] = nationAchieved[person.nationality]!! + 1
                     result.add(personId)
                     resultSize++
 
@@ -270,11 +309,18 @@ class PersonList {
         return result.toTypedArray()
     }
 
+    /**
+     * Checks if a Person is available (no other parallel Tasks, no other excluded Tasks wihtin 24 hours)
+     * checks for FreeFromDuty
+     * handles person.incompatibleTasks
+     */
     private fun freeForTask(personId: String, scheduledTId: String, date: Date): Boolean{
         val person = People.getPersonById(personId)!!
+        if (person.freeFromDuty) return false
         val schedTasks = person.myTasks
         val scheduledTask = Schedule.getScheduledTask(scheduledTId)!!
         val parentTask = Tasks.getTask(scheduledTask.parentTask)!!
+        if (person.incompatibleTasks.contains(parentTask.id)) return false
         val incompatibleTasks: ArrayList<String> = arrayListOf()
 
         for (taskId in (parentTask.excludesTasks + parentTask.excludedBy)){

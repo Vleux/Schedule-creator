@@ -291,7 +291,10 @@ class Generator {
                     // get available people
                     val avPeople = this.peopleAvailable.getAvailablePeople(date)
 
-                    if (avPeople.isEmpty()) throw NoPersonAvailable("A task is scheduled on a date where no person is visiting.\nExiting program ...")
+                    if (avPeople.isEmpty()) {
+                        println(date)
+                        throw NoPersonAvailable("A task is scheduled on a date where no person is visiting.\nExiting program ...")
+                    }
 
                     // Get the available people in reference to their Nations & calculate the ratio
                     val avNations = this.peopleAvailable.getPeopleWithNations(avPeople.keys.toTypedArray())

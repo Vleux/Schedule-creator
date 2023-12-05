@@ -1,14 +1,13 @@
 package files
 
-import scheduling.classes.time.Time
 import java.io.BufferedWriter
 import java.io.File
 
 abstract class WriteFile(path: String) {
     private val file: File = File(path)
     private val writer: BufferedWriter = file.bufferedWriter()
-    val dataTable: MutableMap<Time, MutableList<String>> = mutableMapOf()
-    val days: MutableList<String> = mutableListOf()
+    val dataTable: MutableMap<String, MutableList<String>> = mutableMapOf()
+    var days: MutableList<String> = mutableListOf()
 
     fun writeFile(){
         this.prepareData()

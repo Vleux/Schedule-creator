@@ -18,15 +18,18 @@ class WriteSchedule(path: String): WriteFile(path) {
             this.days.sort()
 
             for (task in entry.value){
-                val time = Schedule.getScheduledTask(task)!!.time.first
+                val time = Schedule.getScheduledTask(task)!!.time
+                val timeString = "${time.first} - ${time.second}"
 
-                if (dataTable[time] != null){
-                    dataTable[time]!!.add(task)
+                if (dataTable[timeString] != null){
+                    dataTable[timeString]!!.add(task)
                 }else{
-                    dataTable[time] = mutableListOf(task)
+                    dataTable[timeString] = mutableListOf(task)
                 }
             }
         }
+
+        println(dataTable)
     }
 
     /**
@@ -40,9 +43,52 @@ class WriteSchedule(path: String): WriteFile(path) {
 
         for (time in times){
 
+            val lines = mutableListOf<Array<String>>()
+
+            tasks@ for (i in this.dataTable[time]!!.indices){
+                val task = Schedule.getScheduledTask(
+                    this.dataTable[time]!![i]
+                )!!
+                val taskName = Tasks.getTask(task.parentTask)!!.name
+                var participants = ""
+                for (personId in task.takenPeople){
+                    val person = People.getPersonById(personId)!!
+                    val lastname = if (person.lastname.length <= 3){
+                        person.lastname
+                    }else {person.lastname.subSequence(0, 3)}
+                    participants += "${person.firstname} ${lastname}., "
+                }
+                val targIndex = this.days.indexOf(Schedule.getDateOfScheduledTask(task.id).toString())
+                if (i == 0){
+                    val array = Array(this.days.size) { "" }
+                    array[0] = time
+
+                    array[targIndex] = taskName
+                    array[targIndex + 1] = participants
+                    lines.add(array)
+                }else{
+                    for (k in lines.indices){
+                        if (lines[k][targIndex] == ""){
+                            println(lines[k][targIndex])
+                            lines[k][targIndex] = taskName
+                            lines[k][targIndex + 1] = participants
+                            continue@tasks
+                        }
+                    }
+                    val newArray = Array(this.days.size){ ""}
+                    newArray[targIndex] = taskName
+                    newArray[targIndex + 1] = participants
+                    lines.add(newArray)
+                }
+
+            }
+
+            lines.forEach{ this.writeLine(it) }
+
+            /*
             // Initializing the Lines (time, name and people)
             val firstLine = Array(this.days.size + 1){""}
-            firstLine[0] = time.toString()
+            firstLine[0] = time
 
             val secondLine = Array(this.days.size + 1){""}
 
@@ -55,7 +101,7 @@ class WriteSchedule(path: String): WriteFile(path) {
                 firstLine[i] = Tasks.getTask(
                     scheduledTask.parentTask
                 )!!.name
-                firstLine[0] = "${firstLine[0]} - ${scheduledTask.time.second}"
+                //firstLine[0] = "${firstLine[0]} - ${scheduledTask.time.second}"
 
                 var people = ""
                 for (id in scheduledTask.takenPeople){
@@ -66,16 +112,26 @@ class WriteSchedule(path: String): WriteFile(path) {
             }
 
             this.writeLine(firstLine, ";")
-            this.writeLine(secondLine, ";")
+            this.writeLine(secondLine, ";")*/
         }
     }
 
     private fun generateFirstLine(): Array<String>{
-        val result = Array(this.days.size + 1){""}
-        for (i in 1 until result.size){
-            result[i] = this.days[i - 1]
+        val result = mutableListOf<String>("")
+        for (day in this.days){
+            result.add(day)
+            result.add("")
         }
-        return result
+        this.days = result.copy()
+        return this.days.toTypedArray()
+    }
+
+    fun MutableList<String>.copy(): MutableList<String>{
+        val newMutableList = mutableListOf<String>()
+        for (item in this){
+            newMutableList.add(item)
+        }
+        return newMutableList
     }
 
 
