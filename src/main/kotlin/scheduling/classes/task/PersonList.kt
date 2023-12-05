@@ -383,4 +383,15 @@ class PersonList {
         }
         return result.toMap()
     }
+
+    fun getAllAvailablePeople(date: Date, scheduledTaskId: String): Array<String>? {
+        val schedTask = Schedule.getScheduledTask(scheduledTaskId) ?: return null
+
+        return getAvailablePeople(
+            date,
+            schedTask.time.first,
+            schedTask.time.second
+        )
+
+    }
 }

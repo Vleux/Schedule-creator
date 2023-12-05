@@ -19,6 +19,7 @@ class Generator {
     private var maximalFairnessTasks: Map<Int, Array<String>> = emptyMap()
     private var mediumFairnessTasks: Map<Int, Array<String>> = emptyMap()
     private var lowFairnessTasks: Map<Int, Array<String>> = emptyMap()
+    private var scheduleLast: MutableList<String> = mutableListOf()
 
     // saves the people that are available on that day. The ones that are arriving/leaving and the ones that are there the whole day
     private var peopleAvailable: PersonList = PersonList()
@@ -42,6 +43,8 @@ class Generator {
 
         this.scheduleTask(Fairness.LOW)
         this.checkCompleteSatisfiedTasks()
+
+        this.scheduleLast()
     }
 
 
@@ -178,6 +181,7 @@ class Generator {
         val lowF: MutableMap<Int, Array<String>> = mutableMapOf()
 
         for (task in tasks){
+
             when (task.requiredFairness){
                 Fairness.MAXIMUM -> {
                     if (maxF[task.excludesTasks.size] == null){
@@ -217,7 +221,7 @@ class Generator {
         for (taskId in Schedule.getAllTasks()){
             val task = Schedule.getScheduledTask(taskId)!!
 
-            if (task.peopleNeeded() != 0){
+            if (task.peopleNeeded() > 0){
                 val amount = task.peopleNeeded()
                 val fairness = Tasks.getTask(task.parentTask)!!.requiredFairness
 
@@ -282,6 +286,10 @@ class Generator {
                 // schedule the abstract task & get those tasks
                 val absTask = Tasks.getTask(taskId)!!
                 absTask.scheduleAll()
+                if (absTask.numberOfPeople < 0){
+                    this.scheduleLast.add(absTask.id)
+                    continue
+                }
                 val scheduledTasks = Schedule.getScheduledTasksOf(absTask.id)
 
                 //iterate over the scheduledTasks
@@ -319,6 +327,36 @@ class Generator {
                     for (person in people){
                         schedTask.addPerson(person)
                     }
+                }
+            }
+        }
+    }
+
+    private fun scheduleLast(){
+        for (taskId in this.scheduleLast){
+            println(taskId)
+
+            // schedule the abstract task & get those tasks
+            val absTask = Tasks.getTask(taskId)!!
+            absTask.scheduleAll()
+            val scheduledTasks = Schedule.getScheduledTasksOf(absTask.id)
+
+            //iterate over the scheduledTasks
+            function@for (entry in scheduledTasks){
+                println(entry)
+                val date = entry.value
+                val schedTask = Schedule.getScheduledTask(entry.key)!!
+
+                //Receive all People. Checking (incompatible tasks, number of chores & co) is done in PersonLists
+                val people = this.peopleAvailable.getAllAvailablePeople(
+                    date,
+                    schedTask.id,
+                ) ?: continue
+
+                println("HERE$people")
+
+                for (person in people){
+                    schedTask.addPerson(person)
                 }
             }
         }
