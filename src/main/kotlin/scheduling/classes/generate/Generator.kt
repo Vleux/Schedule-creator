@@ -334,7 +334,6 @@ class Generator {
 
     private fun scheduleLast(){
         for (taskId in this.scheduleLast){
-            println(taskId)
 
             // schedule the abstract task & get those tasks
             val absTask = Tasks.getTask(taskId)!!
@@ -347,13 +346,11 @@ class Generator {
                 val date = entry.value
                 val schedTask = Schedule.getScheduledTask(entry.key)!!
 
-                //Receive all People. Checking (incompatible tasks, number of chores & co) is done in PersonLists
+                //Receive all People. Checking only for incompatible and parallel tasks
                 val people = this.peopleAvailable.getAllAvailablePeople(
                     date,
                     schedTask.id,
                 ) ?: continue
-
-                println("HERE$people")
 
                 for (person in people){
                     schedTask.addPerson(person)
