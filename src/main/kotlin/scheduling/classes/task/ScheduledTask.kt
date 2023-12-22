@@ -49,7 +49,9 @@ class ScheduledTask(
     // Changing
 
     fun addPerson(personId: String): Boolean{
-        if (!People.doesPersonExist(personId)){
+        if (!People.doesPersonExist(personId) ||
+            this.takenPeople.contains(personId) ||
+            this.takenPeople.size >= Tasks.getTask(parentTask)!!.numberOfPeople){
             return false
         }
         this._takenPeople = this._takenPeople.plus(personId)

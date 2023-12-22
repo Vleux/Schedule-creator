@@ -1,5 +1,3 @@
 package userInterface
 
-class ConsoleActions {
-
-}
+class ConsoleActions
