@@ -46,11 +46,16 @@ class ReadParticipants(path: String): ReadFile(path) {
                         Time(content[8])
                     ),
                     parseIncompatibleTasks(),
-                    parseBoolean(content[5])
+                    parseBoolean(content[9])
                 )
 
 
             )
+            println("""
+                Name:   ${content[0]}
+                Bool:   -${content[9]}-
+                parsed: ${parseBoolean(content[9])}
+            """.trimIndent())
             return true
         }catch(e: Exception){
             println(e)

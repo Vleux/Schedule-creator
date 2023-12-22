@@ -74,6 +74,7 @@ fun tryFiles(){
             Vorname     ${pers.firstname}
             Nachname    ${pers.lastname}
             Nation      ${pers.nationality}
+            freeOfDuty  ${pers.freeFromDuty}
         """.trimIndent())
     }
 
