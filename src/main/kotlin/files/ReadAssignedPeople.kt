@@ -101,18 +101,18 @@ class ReadAssignedPeople(path: String): ReadFile(path) {
                     }
 
                     // Gets the ID's of the people that are assigned to the task and do exist
-                    val personId = mutableListOf<String>()
+                    val personIds = mutableListOf<String>()
 
                     for (personName in entry.value){
                         if (people[personName] != null){
-                            personId.add(people[personName]!!)
+                            personIds.add(people[personName]!!)
                         }else{
                             println("Person $personName does not exist!")
                             println("This program is case-sensitive!!")
                         }
                     }
 
-                    parentTask.schedule(day, time, personId.toTypedArray())
+                    parentTask.schedule(day, time, personIds.toTypedArray())
                 }
 
 

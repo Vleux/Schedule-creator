@@ -21,8 +21,8 @@ fun main() {
 }
 
 fun tryFiles(){
-    val taskReader = ReadTasks("/home/manvel/Dateien/Dokumente/02 Mazedonien/02 MK/Weihnachtsmarkt/Listen/Tasks.csv")
-    val peopleReader = ReadParticipants("/home/manvel/Dateien/Dokumente/02 Mazedonien/02 MK/Weihnachtsmarkt/Listen/participants.csv")
+    val taskReader = ReadTasks("/home/manvel/Dateien/Dokumente/02 Mazedonien/02 MK/04 - RIDE/Weihnachtsmarkt/Listen/Tasks.csv")
+    val peopleReader = ReadParticipants("/home/manvel/Dateien/Dokumente/02 Mazedonien/02 MK/04 - RIDE/Weihnachtsmarkt/Listen/participants.csv")
     println("reading tasks ...")
     taskReader.readFile()
     println("Done.")
@@ -84,8 +84,22 @@ fun tryFiles(){
     """.trimIndent())
 
     println("reading already defined people")
-    val read = ReadAssignedPeople("/home/manvel/Dateien/Dokumente/02 Mazedonien/02 MK/Weihnachtsmarkt/Listen/scheduledPeople.csv")
+    val read = ReadAssignedPeople("/home/manvel/Dateien/Dokumente/02 Mazedonien/02 MK/04 - RIDE/Weihnachtsmarkt/Listen/scheduledPeople.csv")
     read.readFile()
+
+    println("""
+        ##################
+        printing the People in reference to their scheduledTasks
+       """.trimIndent())
+
+    for (personId in People.getAllPeopleIDs()){
+        val pers = People.getPersonById(personId)!!
+        println("""
+            PersonId:   ${personId}
+            name:       ${pers.firstname} ${pers.lastname}
+            tasks       ${pers.myTasks}
+        """.trimIndent())
+    }
 
     println("##################")
     println("printing the Schedule for the first time")
@@ -99,7 +113,7 @@ fun tryFiles(){
 
     println("Done.")
 
-    val save = WriteSchedule("/home/manvel/Dateien/Dokumente/02 Mazedonien/02 MK/Weihnachtsmarkt/Listen/Schedule.csv")
+    val save = WriteSchedule("/home/manvel/Dateien/Dokumente/02 Mazedonien/02 MK/04 - RIDE/Weihnachtsmarkt/Listen/Schedule.csv")
     save.writeFile()
 
     println("-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#")

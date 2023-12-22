@@ -23,6 +23,23 @@ class PersonList {
         }
     }
 
+    fun printMe(){
+        for (i in person.indices){
+            val pers = People.getPersonById(person[i])!!
+            println("""
+                
+                Name:       ${pers.firstname} ${pers.lastname}
+                ID:         ${pers.id}
+                nation:     ${pers.nationality}
+                maxFair:    ${counts[i].maximalFairnessTasks}
+                medFair:    ${counts[i].mediumFairnessTasks}
+                lowFair:    ${counts[i].lowFairnessTasks}
+                general:    ${counts[i].generalTasks}
+                --------------------------------------------------------
+            """.trimIndent())
+        }
+    }
+
     fun addPerson(personId: String): Boolean{
         val person = People.getPersonById(personId)
         if (this.person.contains(personId) || person == null){
@@ -148,7 +165,7 @@ class PersonList {
         val begin = schedTask.time.first
         val end = schedTask.time.second
 
-        val people = this.getAvailablePeople(date, begin, end)
+        val people = this.getAvailablePeople(date, begin, end).toMutableList()
         val finPeople = mutableMapOf<Int, ArrayList<String>>()  // Collects the people in reference of their amount of tasks
         val nationAchieved = mutableMapOf<String, Int>()
         val result = mutableListOf<String>()
@@ -193,8 +210,8 @@ class PersonList {
         }
 
         // Now continue to search for the right people
-
         var counter = 0
+
         // saves the people in relation to their amount of maximalFairnessTasks
         for (personId in people){
 
@@ -217,6 +234,11 @@ class PersonList {
                 )) {
                 println("Person $personId is not free")
                 continue
+            }else{
+                println("""
+                    Person $personId is free at
+                    $date at time ${Schedule.getScheduledTask(scheduledTaskId)!!.time}
+                """.trimIndent())
             }
 
             // Saves the person with its number of tasks
@@ -248,12 +270,14 @@ class PersonList {
                 continue
             }
 
-            val arr = finPeople[smallestCount]!!.toTypedArray()
+            val arr = finPeople[smallestCount]!!.toMutableList()
 
-            for (personId in arr){
+            for (i in 0 until arr.size){
+                val personId = arr.random()
+                arr.remove(personId)
+
                 val person = People.getPersonById(personId)!!
                 if (person.freeFromDuty) continue
-
 
                 /* Ensure that the data is valid & people aren't overwhelmed */
                 if (fairness == Fairness.MAXIMUM && getCounts(personId).maximalFairnessTasks == limit.getMaximalFairnessLimit()){
@@ -315,12 +339,15 @@ class PersonList {
      * handles person.incompatibleTasks
      */
     private fun freeForTask(personId: String, scheduledTId: String, date: Date): Boolean{
+
         val person = People.getPersonById(personId)!!
         if (person.freeFromDuty) return false
+
         val schedTasks = person.myTasks
         val scheduledTask = Schedule.getScheduledTask(scheduledTId)!!
         val parentTask = Tasks.getTask(scheduledTask.parentTask)!!
         if (person.incompatibleTasks.contains(parentTask.id)) return false
+
         val incompatibleTasks: ArrayList<String> = arrayListOf()
 
         for (taskId in (parentTask.excludesTasks + parentTask.excludedBy)){
@@ -331,14 +358,13 @@ class PersonList {
 
         // Inspecting. If a concurrency is found, false is returned
 
-        // Inspecting the excluded Tasks.csv.
+        // Inspecting the excluded Tasks.
         for (taskId in inspectTasks){
             val tryDate = date.copy()
             val task = Schedule.getScheduledTask(taskId)
             val taskDate = Schedule.getDateOfScheduledTask(scheduledTId)
-            if (Schedule.getDateOfScheduledTask(scheduledTId) == tryDate){
-                return false
-            }
+            if (taskDate == tryDate) return false
+
             tryDate.changeDate(1)
             //following day
             if (taskDate == tryDate){
@@ -353,13 +379,18 @@ class PersonList {
 
         //Ensuring that there are no tasks in parallel
         for (entry in schedTasks){
+
             if (entry.value == date){
                 val time = Schedule.getScheduledTask(entry.key)!!.time
-                if (time.first < scheduledTask.time.second &&
-                    time.first > scheduledTask.time.first){
-                    return false
-                }else if (time.second > scheduledTask.time.first &&
-                    time.second < scheduledTask.time.second){
+
+
+                if (time.first > scheduledTask.time.second ||
+                    time.second < scheduledTask.time.first){
+                    println("""
+                        ${time}
+                    """.trimIndent())
+                    continue
+                }else{
                     return false
                 }
             }

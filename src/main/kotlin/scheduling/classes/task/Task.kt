@@ -201,7 +201,9 @@ class Task(
                     // If it is, the people will be added and the method ends
                     for (person in takenPeople){
                         searchedScheduledTask.addPerson(person)
-                        People.getPersonById(person)!!.myTasks[taskID] = date
+                        val pers = People.getPersonById(person)!!
+                        pers.myTasks[taskID] = date
+                        println("Tasks of pers: " + pers.firstname + " " + pers.myTasks)
                         return true
                     }
                 }
@@ -210,14 +212,23 @@ class Task(
 
 
         // In this case the task does not yet exists and will hereby be created
-        this._children.add(
-            Schedule.addScheduledTask(
-                date,
-                this.id,
-                time,
-                takenPeople
-            )
+        val newScheduledTaskId = Schedule.addScheduledTask(
+            date,
+            this.id,
+            time,
+            takenPeople
         )
+        // and it will be added to the children of this task
+        this._children.add(
+            newScheduledTaskId
+        )
+        // and the taken people will be informed that they are in this task
+        for (personId in takenPeople){
+            val pers = People.getPersonById(personId)!!
+            pers.myTasks[newScheduledTaskId] = date
+            println("Tasks of pers: " + pers.firstname + " " + pers.myTasks)
+        }
+
         return true
     }
 

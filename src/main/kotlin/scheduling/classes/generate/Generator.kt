@@ -45,6 +45,8 @@ class Generator {
         this.checkCompleteSatisfiedTasks()
 
         this.scheduleLast()
+        println("People overview")
+        this.peopleAvailable.printMe()
     }
 
 
