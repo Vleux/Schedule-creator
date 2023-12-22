@@ -166,10 +166,10 @@ class PersonList {
         val end = schedTask.time.second
 
         val people = this.getAvailablePeople(date, begin, end).toMutableList()
-        val finPeople = mutableMapOf<Int, ArrayList<String>>()  // Collects the people in reference of their amount of tasks
-        val nationAchieved = mutableMapOf<String, Int>()
-        val result = mutableListOf<String>()
+        val finPeople = mutableMapOf<Int, ArrayList<String>>()  // Collects the people in reference to their amount of tasks
+        val nationAchieved = mutableMapOf<String, Int>()    // saves the amount of people from the nations
 
+        val result = mutableListOf<String>()
 
         // evaluate NationTarget
         val numberFromNation = mutableMapOf<String, Int>()
@@ -181,9 +181,9 @@ class PersonList {
 
         // round the doubles
         for (entry in nationTarget){
-            numberFromNation[entry.key] = (entry.value).roundToInt()
+            val nation = NationBackend.parseNation(entry.key) ?: continue
+            numberFromNation[nation] = (entry.value).roundToInt()
         }
-
 
         // Check that numberFromNation is valid
         var sum = numberFromNation.values.sum()
@@ -192,6 +192,7 @@ class PersonList {
         while (sum < amount){
             val min = numberFromNation.values.min()
             for (entry in numberFromNation){
+
                 if (numberFromNation[entry.key] == min){
                     numberFromNation[entry.key] = numberFromNation[entry.key]!! + 1
                     break
@@ -215,10 +216,7 @@ class PersonList {
         // saves the people in relation to their amount of maximalFairnessTasks
         for (personId in people){
 
-            if (schedTask.takenPeople.contains(personId)) {
-                amount--
-                continue
-            }
+            if (schedTask.takenPeople.contains(personId)) continue
 
             val tasks = when(fairness){
                 Fairness.MAXIMUM -> this.getCounts(personId).maximalFairnessTasks
@@ -232,20 +230,16 @@ class PersonList {
                     scheduledTaskId,
                     date,
                 )) {
-                println("Person $personId is not free")
                 continue
-            }else{
-                println("""
-                    Person $personId is free at
-                    $date at time ${Schedule.getScheduledTask(scheduledTaskId)!!.time}
-                """.trimIndent())
             }
 
             // Saves the person with its number of tasks
             if (finPeople[tasks] == null){
                 finPeople[tasks] = arrayListOf(personId)
-            }else{
+            }else if (!finPeople[tasks]!!.contains(personId)){
                 finPeople[tasks]!!.add(personId)
+            }else{
+                continue
             }
             counter++
         }
@@ -291,17 +285,24 @@ class PersonList {
                     throw Error("")
                 }
 
-                if (!numberFromNation.keys.contains(person.nationality)) {
-                    println("wrong nation")
+                if (!numberFromNation.keys.contains(
+                        NationBackend.parseNation(person.nationality)
+                )) {
+                    println("bad nation")
                     continue
                 }
-                if (nationAchieved[person.nationality] == null){
-                    nationAchieved[person.nationality] = 0
+                val persNation = NationBackend.parseNation(person.nationality)!!
+                if (nationAchieved[persNation] == null){
+                    nationAchieved[persNation] = 0
                 }
 
                 // add person to the list and increase it's work-count if more people of his nationality are needed
-                if (nationAchieved[person.nationality]!! < numberFromNation[person.nationality]!!){
-                    nationAchieved[person.nationality] = nationAchieved[person.nationality]!! + 1
+                if (nationAchieved[persNation]!! < numberFromNation[persNation]!!){
+                    if (result.contains(personId)){
+                        continue
+                    }
+
+                    nationAchieved[persNation] = nationAchieved[persNation]!! + 1
                     result.add(personId)
                     resultSize++
 
@@ -311,21 +312,17 @@ class PersonList {
                         Fairness.LOW -> this.getCounts(personId).lowFairnessTasks++
                     }
 
+                    // removes the person from the finPeople (and the smalles count when empty)
+                    // does not re-add. If it would do so, people could be added twice or thrice if the next amount of chores is reached
                     finPeople[smallestCount]!!.remove(personId)
                     if (finPeople[smallestCount]!!.isEmpty()){
                         finPeople.remove(smallestCount)
                     }
-
-                    if (finPeople[smallestCount + 1] == null){
-                        finPeople[smallestCount + 1] = arrayListOf(personId)
-                    }else{
-                        finPeople[smallestCount + 1]!!.add(personId)
-                    }
                 }
-                if (amount <= resultSize) break
+
             }
             counter++
-            if (counter == 1000) throw Error("Infinite Loop detected")
+            if (counter == 10000) throw Error("Infinite Loop detected")
 
             smallestCount++
 
